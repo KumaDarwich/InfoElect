@@ -1,0 +1,1142 @@
+#!/usr/bin/env python3
+"""
+Generates /home/kuma/infoelect/data/topics_knowledge.json containing 14 verified,
+strictly impartial comparative briefs across all 4 official 29N 2026 PDFs for
+InfoElect's Impartial Chatbot Comparator.
+"""
+
+import json
+from pathlib import Path
+
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+
+TOPICS = [
+    {
+        "id": "pensiones",
+        "title": "Pensiones y jubilación",
+        "exact_triggers": ["pension", "pensiones", "jubilacion", "pensionistas", "pacto de toledo"],
+        "keywords": ["ipc", "revalorizacion", "edad", "cotizacion", "seguridad social", "mutuas", "hucha", "minima"],
+        "key_differences": [
+            "**Revalorización con el IPC y blindaje:** Frente Amplio y PSOE proponen blindar constitucionalmente el sistema público y su subida con el IPC; el PP compromete la subida anual con el IPC reconstruyendo el Pacto de Toledo; el programa de VOX no menciona el IPC y vincula la sostenibilidad a productividad, empleo y natalidad.",
+            "**Edad de jubilación:** Frente Amplio propone volver a los 65 años (y 60 en oficios penosos); el PSOE plantea mejorar coeficientes reductores por penosidad y jubilaciones anticipadas involuntarias (sin cambiar la edad ordinaria); el PP incentiva fiscalmente la jubilación activa (y reserva la medida 109 para campaña); VOX no fija propuestas sobre la edad ordinaria.",
+            "**Financiación y gestión:** Frente Amplio y PSOE plantean destopar bases/solidaridad y aportar ingresos ligados a automatización (PSOE integra mutuas en la gestión pública y Frente Amplio suprime deducciones a planes privados); el PP blinda legalmente la caja única de la Seguridad Social; VOX añade cotización estatal por cuidado de hijos.",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (sección 4.3), propone blindar en la Constitución la pensión pública, el IPC y una pensión mínima igual al SMI, además de volver a la jubilación a los 65 años.",
+                "points": [
+                    "Blindaje constitucional (art. 167 CE) del carácter público, la revalorización automática con el IPC, la prohibición de privatizar su gestión y que ninguna pensión sea inferior al SMI.",
+                    "Retorno de la edad ordinaria de jubilación a los 65 años (60 años en oficios penosos como construcción, limpieza o pesca) y eliminación de penalizaciones en anticipadas involuntarias con >40 años cotizados.",
+                    "Publicación inmediata de la auditoría de la Seguridad Social (1967–2019), destope progresivo de bases máximas, aportación adicional de empresas más automatizadas y eliminación de deducciones en IRPF a planes privados individuales.",
+                ],
+                "citations": [
+                    {"pdf_page": 57, "doc_page": 63, "section": "4.3 Pensiones públicas dignas"},
+                    {"pdf_page": 58, "doc_page": 64, "section": "4.3 Pensiones públicas dignas"},
+                    {"pdf_page": 46, "doc_page": 51, "section": "3.3 Rentas del capital"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (medidas 18 y 108), garantiza la subida anual de las pensiones con el IPC bajo un Pacto de Toledo reconstruido, la caja única y deducciones por jubilación activa.",
+                "points": [
+                    "Reconstrucción del Pacto de Toledo asegurando que las pensiones actuales mantengan su poder adquisitivo subiendo cada año con el IPC y garantizando también el poder adquisitivo de futuras pensiones jóvenes.",
+                    "Incentivo a la jubilación activa mediante deducciones en el IRPF y blindaje legal de la caja única de la Seguridad Social sin división territorial.",
+                    "Compatibilidad de pensiones de discapacidad con empleo y ampliación de jubilación anticipada para personas con síndrome de Down. *(Nota: la medida 109 siguiente en el documento está reservada para anunciarse en campaña; el texto no detalla cambios en la edad general de jubilación ni planes privados específicos).*",
+                ],
+                "citations": [
+                    {"pdf_page": 34, "doc_page": 34, "section": "3.2 Medida 108"},
+                    {"pdf_page": 15, "doc_page": 15, "section": "1.3 Medida 18"},
+                    {"pdf_page": 35, "doc_page": 35, "section": "3.2 Medida 112"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (compromisos 98–107), propone blindar constitucionalmente el sistema público y su revalorización al IPC, reforzar sus ingresos e integrar las mutuas en la gestión pública.",
+                "points": [
+                    "Blindaje constitucional del sistema público y su revalorización conforme al IPC, culminando la convergencia de pensiones mínimas y la separación de fuentes.",
+                    "Aceleración de la cuota de solidaridad y negociación en el Pacto de Toledo de nuevas fuentes vinculadas a productividad por automatización; compensación de jubilaciones anticipadas involuntarias por empresas con beneficios que hagan ERE.",
+                    "Reconocimiento de 1 año adicional de cotización por hijo/a contra la brecha de género, cuenta individual de penosidad, subida de la pensión de orfandad del 20 % al 30 % e integración de las mutuas colaboradoras en la gestión pública.",
+                ],
+                "citations": [
+                    {"pdf_page": 39, "doc_page": 40, "section": "Pensiones · Comp. 98–99"},
+                    {"pdf_page": 40, "doc_page": 41, "section": "Pensiones · Comp. 100–104"},
+                    {"pdf_page": 41, "doc_page": 42, "section": "Pensiones · Comp. 106–107"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (puntos 7 y 94), centra la sostenibilidad del sistema en el crecimiento económico, productividad, salarios y natalidad, sin mencionar IPC ni edad ordinaria de jubilación.",
+                "points": [
+                    "Sostenibilidad basada en revitalizar la economía, impulsar el empleo, mejorar los salarios, aumentar la productividad y fomentar la natalidad para revertir el envejecimiento demográfico.",
+                    "Cotización a la Seguridad Social financiada por el Estado para españoles dedicados al cuidado de sus hijos, con el fin de evitar penalizaciones en la jubilación.",
+                    "*(Nota de verificación: el programa descargado de VOX no contiene menciones a la revalorización con el IPC, la edad de jubilación, cuantías mínimas ni planes privados de pensiones).*",
+                ],
+                "citations": [
+                    {"pdf_page": 10, "doc_page": 10, "section": "Economía · Punto 7"},
+                    {"pdf_page": 51, "doc_page": 51, "section": "Familia y Vida · Punto 94"},
+                ],
+            },
+        },
+        "followups": [
+            "¿Qué diferencias hay en impuestos (IRPF e IVA)?",
+            "Compara las propuestas de empleo, SMI y jornada laboral",
+            "¿Qué proponen sobre ayudas a familias y cuidados?",
+        ],
+    },
+    {
+        "id": "vivienda",
+        "title": "Vivienda y alquiler",
+        "exact_triggers": ["vivienda", "alquiler", "alquileres", "hipoteca", "hipotecas", "pisos turisticos", "casa 47"],
+        "keywords": ["suelo", "inmueble", "parque publico", "zonas tensionadas", "socimi", "vut", "arrendamiento", "aval"],
+        "key_differences": [
+            "**Regulación del alquiler y Ley de Vivienda:** Frente Amplio y PSOE mantienen e intensifican la regulación (Frente Amplio topa rentas al 25 % de la renta/SERPAVI con contratos indefinidos y expropiación a grandes tenedores; PSOE congela temporalmente rentas en zonas tensionadas); PP y VOX proponen derogar la Ley de Vivienda y eliminar los topes.",
+            "**Oferta pública vs. suelo y fiscalidad:** Frente Amplio compromete 1 % del PIB anual para 1,5 M de viviendas públicas (alquiler ≤600 €) y PSOE 1 % del PIB y 100.000 viviendas con CASA 47; PP plantea construir 1 millón de viviendas con nueva Ley del Suelo, IVA al 4 % y avales para <40 años; VOX propone reforma del suelo, 0 % IVA / 100 % bonificación ITP en primera vivienda y prioridad nacional.",
+            "**Viviendas turísticas y fondos:** Frente Amplio extingue licencias VUT en zonas tensionadas en 3 años y prohíbe compras por personas jurídicas con ánimo de lucro; PSOE grava a grandes tenedores/fondos y habilita tasas municipales a VUT; VOX grava a compradores no comunitarios y fondos especulativos y regula VUT; PP prioriza incentivos fiscales al alquiler estable («Tres años+»).",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (capítulo 01), propone elevar la vivienda a derecho fundamental en la Constitución, crear 1,5 millones de viviendas públicas y topar alquileres.",
+                "points": [
+                    "Asignación del 1 % del PIB anual (~17.000 M€/año) para incorporar 1,5 millones de viviendas públicas en 12 años con alquiler público topado a 600 €/mes (80 m²).",
+                    "Topes de alquiler al menor valor entre 25 % de renta media y SERPAVI (más rebaja adicional del 30 % en municipios >200.000 hab.), contrato indefinido y extinción de pisos turísticos en zonas tensionadas en máximo 3 años.",
+                    "Ley de Expropiación a propietarios corporativos (>1.000, >700 y >50 pisos), veto a compra residencial por empresas con ánimo de lucro, escudo hipotecario de hasta 300 €/mes y prohibición de desahucios a vulnerables sin alternativa.",
+                ],
+                "citations": [
+                    {"pdf_page": 10, "doc_page": 13, "section": "1.1 Parque público"},
+                    {"pdf_page": 12, "doc_page": 15, "section": "1.2–1.3 Alquileres y VUT"},
+                    {"pdf_page": 15, "doc_page": 18, "section": "1.4 Desahucios e hipotecas"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (sección 4.1), enfoca la política en construir un millón de viviendas, derogar la Ley de Vivienda, reducir impuestos a jóvenes y desalojar ocupaciones en 48 horas.",
+                "points": [
+                    "Plan de 1 millón de viviendas, nueva Ley del Suelo, cambio de uso de locales a vivienda y licencias en 3 meses con silencio positivo.",
+                    "Derogación de la Ley de Vivienda y de las zonas tensionadas; incentivos fiscales en IRPF a inquilinos y a propietarios que renueven 3 años por debajo del IPC («Tres años+»).",
+                    "IVA al 4 % fraccionado para primera vivienda de menores de 40 años (y 4 % en rehabilitación), aval público del 20 %, «Hucha Hogar Joven» (deducción 20 % hasta 40.000 €) y desalojo judicial de ocupas en 48 horas.",
+                ],
+                "citations": [
+                    {"pdf_page": 41, "doc_page": 41, "section": "4.1 Medida 144"},
+                    {"pdf_page": 42, "doc_page": 42, "section": "4.1 Medidas 145–148"},
+                    {"pdf_page": 43, "doc_page": 43, "section": "4.1 Medidas 153–157"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (págs. 26–34), propone consolidar un parque público permanente (1 % del PIB y 100.000 viviendas con CASA 47), congelar rentas tensionadas y desplegar préstamos TUCASA.",
+                "points": [
+                    "Reforma constitucional del derecho a la vivienda, 1 % del PIB anual, Plan Estatal 2026–2030 (7.000 M€) y 100.000 viviendas públicas a través de CASA 47 con rehabilitación de 550.000 hogares.",
+                    "Congelación temporal de alquileres por encima de índices de referencia en zonas tensionadas, registro estatal de precios, impuesto progresivo a fondos buitre/viviendas vacías y recargo municipal a pisos turísticos.",
+                    "Programa TUCASA (10.000 M€) con préstamos sin intereses de hasta 50.000 € para primera vivienda, garantía pública de alquiler joven y escudo antidesahucios asumido por administraciones sin coste al pequeño propietario.",
+                ],
+                "citations": [
+                    {"pdf_page": 27, "doc_page": 28, "section": "Vivienda · Comp. 37–41"},
+                    {"pdf_page": 31, "doc_page": 32, "section": "Ayudas y especulación · Comp. 64–73"},
+                    {"pdf_page": 33, "doc_page": 34, "section": "Escudo social · Comp. 84–85"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (puntos 26–35), propone liberar suelo, suprimir IVA e ITP en la primera vivienda habitual, derogar la Ley de Vivienda, aplicar prioridad nacional y desalojar okupas en 24 horas.",
+                "points": [
+                    "Reforma de la Ley del Suelo, vivienda protegida con colaboración público-privada, 0 % de IVA en vivienda habitual nueva y bonificación del 100 % del ITP en segunda mano para familias españolas.",
+                    "Derogación de la Ley de Vivienda, incentivos al alquiler estable, regulación/inspección de VUT y fiscalidad agravada para compradores no comunitarios y fondos especulativos.",
+                    "Prioridad nacional en vivienda pública y ayudas, prohibición de alquilar a inmigrantes irregulares con control de empadronamiento, desalojo de okupas en menos de 24 horas y tipificación penal de la inquiocupación.",
+                ],
+                "citations": [
+                    {"pdf_page": 23, "doc_page": 23, "section": "Vivienda · Puntos 26–30"},
+                    {"pdf_page": 24, "doc_page": 24, "section": "Vivienda · Puntos 31–34"},
+                    {"pdf_page": 25, "doc_page": 25, "section": "Vivienda · Punto 35"},
+                ],
+            },
+        },
+        "followups": [
+            "¿Qué propone cada partido sobre okupación y desahucios?",
+            "Compara los impuestos sobre la vivienda y el IRPF",
+            "¿Qué diferencias hay en las pensiones?",
+        ],
+    },
+    {
+        "id": "okupacion_desahucios",
+        "title": "Okupación ilegal y desahucios",
+        "exact_triggers": ["okupacion", "ocupacion", "okupas", "ocupas", "inquiocupacion", "inquiokupacion", "desahucio", "desahucios"],
+        "keywords": ["desalojo", "propietario", "vulnerable", "alternativa habitacional"],
+        "key_differences": [
+            "**Plazos de desalojo por ocupación ilegal:** VOX fija el desalojo en menos de 24 horas y tipifica la inquiocupación como estafa; PP y PSOE fijan un horizonte de 48 horas por vía judicial (PP mediante ley específica y exención de tributos; PSOE reforzando los juicios rápidos de 2025 en su bloque de Justicia); Frente Amplio no incluye medidas punitivas de desalojo exprés y centra su bloque en prohibir desahucios sin alternativa habitacional.",
+            "**Protección frente a desahucios de hogares vulnerables:** Frente Amplio propone prohibir permanentemente todo desahucio de vulnerables sin alternativa (imponiendo alquiler social de ≥7 años a grandes tenedores y compensando al pequeño propietario); PSOE mantiene el escudo antidesahucios asumiendo las administraciones el coste para no perjudicar al pequeño propietario; PP y VOX ponen el foco en la recuperación inmediata de la posesión y protección fiscal del propietario.",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (sección 1.4), prioriza prohibir permanentemente los desahucios de hogares vulnerables sin alternativa habitacional.",
+                "points": [
+                    "Prohibición legal permanente de desahucios sin alternativa habitacional: los grandes tenedores deben ofrecer alquiler social de al menos 7 años y las administraciones abonan el alquiler de índice al pequeño propietario.",
+                    "Absorción estatal de primeras viviendas con impago hipotecario para mantener a las familias en alquiler social y regulación de la dación en pago.",
+                    "*(Nota: el programa no contiene medidas específicas de desalojo exprés por ocupación ilegal).*",
+                ],
+                "citations": [
+                    {"pdf_page": 15, "doc_page": 18, "section": "1.4 Ni un desahucio más"},
+                    {"pdf_page": 19, "doc_page": 22, "section": "1.9 Reforma art. 47 CE"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (medidas 20 y 157), propone una ley específica para desalojar ocupas en 48 horas por orden judicial y proteger fiscalmente al propietario.",
+                "points": [
+                    "Ley de desalojo en 48 horas por orden judicial desde el primer día y reforma de la Ley de Propiedad Horizontal para que comunidades de propietarios puedan solicitarlo.",
+                    "Exención para el propietario de agua, luz, gas e impuestos mientras dure la ocupación, nulidad del empadronamiento del ocupa y penas más duras a mafias y multirreincidencia.",
+                ],
+                "citations": [
+                    {"pdf_page": 43, "doc_page": 43, "section": "4.1 Medida 157"},
+                    {"pdf_page": 16, "doc_page": 16, "section": "1.4 Medida 20"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (págs. 34 y 101), combina el escudo frente a desahucios de vulnerables asumido por administraciones con el objetivo judicial de desalojos en 48 horas por ocupación ilegal.",
+                "points": [
+                    "Escudo frente a desahucios de personas vulnerables sin alternativa habitacional garantizando que el coste lo asuman las administraciones y no el pequeño propietario.",
+                    "En el bloque de Justicia, fija el objetivo de juicios por desahucio en máximo 3 meses y desalojos de viviendas ocupadas ilegalmente en 48 horas reforzando los juzgados de guardia sobre los juicios rápidos de 2025.",
+                ],
+                "citations": [
+                    {"pdf_page": 33, "doc_page": 34, "section": "Escudo social · Comp. 84–85"},
+                    {"pdf_page": 100, "doc_page": 101, "section": "Justicia de calidad"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (punto 31), plantea el desalojo en menos de 24 horas, endurecimiento penal y tipificación de la inquiocupación como delito de estafa.",
+                "points": [
+                    "Desalojo de viviendas okupadas en menos de 24 horas y recuperación inmediata de la posesión con asistencia jurídica gratuita para propietarios afectados.",
+                    "Exención de impuestos, cargas y suministros durante la okupación, endurecimiento del Código Penal y tipificación específica de la inquiocupación como estafa.",
+                ],
+                "citations": [
+                    {"pdf_page": 24, "doc_page": 24, "section": "Vivienda · Punto 31"},
+                ],
+            },
+        },
+        "followups": [
+            "Compara todas las propuestas de vivienda y alquiler",
+            "¿Qué diferencias hay en seguridad y justicia?",
+        ],
+    },
+    {
+        "id": "impuestos",
+        "title": "Impuestos y fiscalidad (IRPF, IVA, Sociedades y Patrimonio)",
+        "exact_triggers": ["impuesto", "impuestos", "fiscalidad", "fiscal", "irpf", "iva", "patrimonio", "sucesiones", "sociedades", "tributos"],
+        "keywords": ["hacienda", "deflactar", "zucman", "tobin", "grandes fortunas", "bajada impuestos", "subida impuestos"],
+        "key_differences": [
+            "**Dirección fiscal global:** Frente Amplio y PSOE proponen aumentar la progresividad sobre grandes rentas del capital, grandes patrimonios, lujo y corporaciones para financiar derechos sociales, aliviando rentas bajas; PP y VOX proponen bajadas generalizadas de IRPF, IVA y tributación empresarial/inversora acompañadas de auditorías y recorte de gasto público.",
+            "**IVA:** PP plantea 0 % en alimentos básicos (incluidos carne, pescado y conservas) y 4 % en primera vivienda joven/rehabilitación; VOX plantea rebajar tipos reducido y general y 0 % en primera vivienda habitual; Frente Amplio baja IVA en pañales, celiaquía, veterinaria y luz (progresivo desde 0 %) pero quita exención a enseñanza privada; PSOE no plantea rebaja general de IVA y refuerza el control de la CNMC para que eventuales rebajas lleguen al precio final.",
+            "**Patrimonio, Sucesiones y Sociedades:** Frente Amplio propone tipo mínimo efectivo del 20 % en Sociedades a grandes grupos, Tasa Zucman del 3 % (>50 M€) e impuesto estatal a herencias >1 M€; PSOE sube IRPF del capital hasta 35 % (>300.000 €), duplica tasa Tobin (0,4 %) y grava cotizadas con brecha salarial >100:1; PP y VOX no mencionan expresamente Patrimonio ni Sucesiones (PP defiende la autonomía fiscal de las CCAA y libertad de amortización en Sociedades; VOX rebaja Sociedades sin cifrar tipo).",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (capítulo 03), propone una reforma fiscal profunda centrada en grandes grupos empresariales, sector financiero y grandes patrimonios, bajando IRPF a salarios bajos.",
+                "points": [
+                    "IRPF: rebaja hasta 27.000 € (SMI exento), nuevos tramos desde 120.000 € hasta 52 % desde 300.000 € y equiparación progresiva de rentas del capital al trabajo.",
+                    "Sociedades y fortunas: mínimo efectivo del 20 % para grandes grupos, gravámenes estructurales a banca y energéticas (1,2 %), tasa Google al 15 %, Tasa Zucman del 3 % anual (>50 M€) e impuesto estatal a grandes herencias (>1 M€, límite 10 M€/heredero).",
+                    "IVA: 0 % sin gluten, IVA eléctrico progresivo 0–21 %, reducción en pañales y veterinaria, y supresión de exención en enseñanza privada y seguros sanitarios privados.",
+                ],
+                "citations": [
+                    {"pdf_page": 44, "doc_page": 49, "section": "3.1 Grandes empresas"},
+                    {"pdf_page": 45, "doc_page": 50, "section": "3.2 Grandes patrimonios"},
+                    {"pdf_page": 46, "doc_page": 51, "section": "3.3–3.4 IRPF e IVA"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (sección 4.4), plantea rebajar y deflactar el IRPF, reducir el IVA de alimentos básicos al 0 %, ampliar incentivos en Sociedades y blindar la autonomía fiscal autonómica.",
+                "points": [
+                    "IRPF: rebaja a rentas medias, bajas y familias, deflactación ante inflación, exención automática legal del SMI y reducción a jóvenes de 18–35 años (100 %/75 %/50 %/25 % en sus 4 primeros años).",
+                    "IVA: 0 % en alimentos básicos (incluidos carne, pescado y conservas) mientras dure la crisis de inflación; 4 % en primera vivienda de menores de 40 años y rehabilitación; exención de declarar IVA a autónomos <85.000 €.",
+                    "Sociedades y CCAA: libertad de amortización inmediata para inversión en maquinaria, IA y patentes; defensa de la libertad fiscal de las CCAA (sin mención expresa a Patrimonio ni Sucesiones).",
+                ],
+                "citations": [
+                    {"pdf_page": 47, "doc_page": 47, "section": "4.4 Medidas 177–185"},
+                    {"pdf_page": 46, "doc_page": 46, "section": "4.3 Medida 171"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (págs. 48–50), combina reducción gradual de déficit y deuda con más progresividad en rentas altas del capital, tasa Tobin, tecnológicas y lujo, y alivios en IRPF a rentas bajas.",
+                "points": [
+                    "IRPF: crédito fiscal reembolsable por descendiente para 2 millones de hogares de rentas medias/bajas, exención del SMI, deducción condicional por precios y subida de tipos del ahorro hasta el 35 % desde 300.000 €.",
+                    "Empresas y capital: duplica la tasa Tobin del 0,2 % al 0,4 %, amplía tasa Google a IA, crea tasa sobre viajes de lujo del 0,1 % más rico y grava en Sociedades a cotizadas cuya ratio salarial directivo/mediana supere 100:1.",
+                    "IVA y patrimonios: no propone rebaja general del IVA (refuerza CNMC sobre precios); destina la tributación complementaria de grandes patrimonios y capital a la prestación por crianza e impulsa un impuesto mínimo global.",
+                ],
+                "citations": [
+                    {"pdf_page": 48, "doc_page": 49, "section": "Fiscalidad justa · Comp. 130–133"},
+                    {"pdf_page": 49, "doc_page": 50, "section": "Fiscalidad justa · Comp. 134–135"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (puntos 2–3), propone una rebaja fiscal general en IRPF, IVA, Sociedades y electricidad compensada con recortes del gasto público y de subvenciones.",
+                "points": [
+                    "Rebaja y simplificación del IRPF en función del número de hijos, bajada del IVA reducido y general (priorizando bienes esenciales) y rebaja del Impuesto de Sociedades (sin detallar tipos o tramos numéricos).",
+                    "0 % de IVA y bonificación del 100 % del ITP en primera vivienda habitual, bajada masiva de impuestos eléctricos, cuota de autónomos de 0 € bajo el SMI y gravamen a remesas al extranjero.",
+                    "Compensación mediante auditoría pública, reducción del tamaño administrativo y supresión de subvenciones a partidos, sindicatos, patronales y ONG. *(No cita expresamente Patrimonio ni Sucesiones).*",
+                ],
+                "citations": [
+                    {"pdf_page": 9, "doc_page": 9, "section": "Economía · Puntos 2–3"},
+                    {"pdf_page": 24, "doc_page": 24, "section": "Vivienda · Punto 34"},
+                ],
+            },
+        },
+        "followups": [
+            "¿Qué proponen sobre autónomos y pymes?",
+            "Compara las propuestas de financiación autonómica y Estado",
+            "¿Qué diferencias hay en las pensiones?",
+        ],
+    },
+    {
+        "id": "sanidad",
+        "title": "Sanidad pública, listas de espera y salud mental",
+        "exact_triggers": ["sanidad", "salud", "listas de espera", "atencion primaria", "salud mental", "hospitales", "medicos", "bucodental", "dentista"],
+        "keywords": ["sns", "muface", "farmacia", "psicologos", "privatizacion", "tarjeta sanitaria"],
+        "key_differences": [
+            "**Gestión pública vs. colaboración público-privada:** Frente Amplio deroga la Ley 15/1997 para revertir privatizaciones, integra MUFACE y crea una farmacéutica pública; PSOE limita privatizaciones priorizando gestión directa; PP defiende un Pacto de Estado con CCAA respetando competencias autonómicas; VOX fomenta la colaboración público-privada evaluada cuando reduzca listas de espera.",
+            "**Financiación y cartera de servicios:** Frente Amplio fija un suelo del 8 % del PIB (25 % Primaria), dental al 50 %, Plan Veo universal y audífonos; PSOE consolida en torno al 7 % del PIB, Plan Sonríe dental (con ayuda de 200 €) y psicología gratuita en máximo 30 días; PP propone al menos 4.500 médicos más en Primaria, Plan de Salud Mental 2027–2037 y deducciones en IRPF para enfermedades graves; VOX propone tarjeta única sin requisito de lenguas regionales, Red de Oncología y retorno de sanitarios.",
+            "**Universalidad de acceso:** Frente Amplio y PSOE blindan la atención sanitaria universal sin distinción de estatus administrativo; VOX propone excluir a extranjeros en situación irregular salvo urgencia grave y acabar con el turismo sanitario; PP centra su propuesta en tarjeta e historial únicos interoperables en toda España.",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (sección 2.4), propone blindar el 8 % del PIB en sanidad 100 % pública, derogar la Ley 15/1997, ampliar prestaciones y crear una farmacéutica pública.",
+                "points": [
+                    "Financiación mínima del 8 % del PIB (25 % a Atención Primaria), universalidad sin distinguir situación administrativa, derogación de la Ley 15/1997 e integración de MUFACE, MUGEJU e ISFAS.",
+                    "Ampliación dental pública al menos al 50 % de la población, universalización del Plan Veo (gafas/lentillas) e inclusión de audífonos.",
+                    "Ratio mínima de 10 profesionales de salud mental por 100.000 hab., Real Decreto contra listas de espera paralelas (incluyendo Primaria y Salud Mental) e industria farmacéutica 100 % pública.",
+                ],
+                "citations": [
+                    {"pdf_page": 26, "doc_page": 30, "section": "2.4 Sanidad pública"},
+                    {"pdf_page": 27, "doc_page": 31, "section": "2.4 Cartera y Primaria"},
+                    {"pdf_page": 28, "doc_page": 32, "section": "2.4 Salud mental y listas"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (medidas 93 y 219–226), plantea un Pacto de Estado sanitario con las CCAA, 4.500 médicos más en Primaria, tarjeta única y Plan de Salud Mental 2027–2037.",
+                "points": [
+                    "Pacto de Estado por la Sanidad Pública y plan urgente de listas de espera acordado con las CCAA, con tarjeta e historia clínica y social únicas en toda España.",
+                    "Incorporación de al menos 4.500 médicos en Atención Primaria, ámbito propio de negociación médica, reducción de guardias y Plan Nacional de Salud Mental 2027–2037.",
+                    "Aceleración en aprobación de fármacos innovadores, deducciones en IRPF por cáncer, ELA, enfermedades graves y celiaquía, y Ley Nacional de Cuidados Paliativos.",
+                ],
+                "citations": [
+                    {"pdf_page": 31, "doc_page": 31, "section": "3.1 Medida 93"},
+                    {"pdf_page": 52, "doc_page": 52, "section": "4.8 Medidas 219–220"},
+                    {"pdf_page": 53, "doc_page": 53, "section": "4.8 Medidas 223–226"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (compromisos 136–155), propone consolidar la inversión en torno al 7 % del PIB, limitar privatizaciones y sumar salud dental y psicología en 30 días.",
+                "points": [
+                    "Financiación pública en torno al 7 % del PIB para acabar con listas de espera, preferencia de gestión directa y blindaje constitucional de salud y aborto (art. 43 CE).",
+                    "Plan Sonríe (tratamientos dentales básicos adultos y ayuda transitoria de hasta 200 €/año), ampliación del Plan VEO y atención psicológica gratuita con primera cita en máximo 30 días.",
+                    "Plan de Atención Primaria más allá de 2027, pediatría rural, nuevo contrato con profesionales sanitarios y Ley de Salud Digital interoperable.",
+                ],
+                "citations": [
+                    {"pdf_page": 49, "doc_page": 50, "section": "Sanidad · Comp. 136–138"},
+                    {"pdf_page": 50, "doc_page": 51, "section": "Sanidad · Comp. 139–144"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (puntos 20 y 60–65), apuesta por tarjeta única sin barreras lingüísticas, reducción de demoras con colaboración público-privada y exclusión de irregulares salvo urgencia grave.",
+                "points": [
+                    "Tarjeta sanitaria única e historia compartida en toda España, suprimiendo el requisito de lenguas regionales en oposiciones sanitarias.",
+                    "Plan nacional de listas de espera con derivaciones entre territorios y colaboración público-privada evaluada; refuerzo de Primaria rural, subida salarial sanitaria y plan de retorno.",
+                    "Exclusión de extranjeros en situación ilegal salvo urgencia grave, fin del turismo sanitario, Red Nacional de Oncología y refuerzo de Salud Mental.",
+                ],
+                "citations": [
+                    {"pdf_page": 37, "doc_page": 37, "section": "Sanidad · Puntos 60–63"},
+                    {"pdf_page": 38, "doc_page": 38, "section": "Sanidad · Puntos 64–65"},
+                    {"pdf_page": 19, "doc_page": 19, "section": "Prioridad nacional · Punto 20"},
+                ],
+            },
+        },
+        "followups": [
+            "¿Qué diferencias hay en educación y universidades?",
+            "Compara las propuestas de dependencia y cuidados",
+        ],
+    },
+    {
+        "id": "educacion",
+        "title": "Educación, becas, FP y universidad",
+        "exact_triggers": ["educacion", "colegios", "universidad", "universidades", "becas", "pisa", "evau", "pau", "ebau", "lomloe", "concertada", "profesorado"],
+        "keywords": ["fp", "formacion profesional", "ratios", "escuela", "pantallas", "moviles", "castellano", "lenguas"],
+        "key_differences": [
+            "**LOMLOE y currículo:** PP y VOX proponen derogar o sustituir la LOMLOE e implantar una prueba de acceso universitaria común (PAU/EVAU única) garantizando la enseñanza en castellano/español en todo el país; PSOE y Frente Amplio mantienen el marco competencial actual priorizando reducción de ratios, inclusión y financiación pública.",
+            "**Red pública vs. concertada:** Frente Amplio plantea una hoja de ruta hacia el 100 % de financiación para la escuela pública, prohíbe cuotas en concertada y quita exención de IVA a la privada; PSOE fortalece la red pública y endurece requisitos a universidades privadas; PP blinda la libertad de elección y conciertos de al menos 6 años cubriendo el coste real; VOX plantea distrito único, libre elección y prioridad nacional en ayudas escolares.",
+            "**Etapa 0–3 años y universidad:** Los cuatro programas incluyen medidas para avanzar hacia la gratuidad de la etapa 0–3 años (Frente Amplio y PSOE vía red pública; PP cofinanciando 50 % plazas públicas y concertadas; VOX dentro de su Plan de Natalidad). En universidad, PSOE propone gratuidad del 1.er curso público y Frente Amplio reducir tasas hacia la gratuidad con 1 % PIB regional; PP y VOX enfatizan autonomía universitaria, becas y libertad de cátedra.",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (sección 2.5), propone blindar el 7 % del PIB en educación pública, reducir ratios por ley, ampliar becas y concentrar progresivamente los recursos en la red pública.",
+                "points": [
+                    "Ley de Financiación Educativa hasta el 7 % del PIB en 2030, gratuidad pública 0–3 años y comedor escolar gratuito universal en Infantil y Primaria públicos.",
+                    "Ratios máximas legales (15 en Primaria/FP, 20 ESO, 23 Bachillerato), becas al 0,44 % del PIB con becas-salario y financiación universitaria del 1 % del PIB regional reduciendo tasas hacia la gratuidad.",
+                    "Hoja de ruta hacia el 100 % de fondos para la escuela pública, prohibición de cuotas en concertada, fin de exención de IVA en privada y climatización de 28.000 centros.",
+                ],
+                "citations": [
+                    {"pdf_page": 31, "doc_page": 35, "section": "2.5 Educación pública"},
+                    {"pdf_page": 32, "doc_page": 36, "section": "2.5 Becas e inclusión"},
+                    {"pdf_page": 33, "doc_page": 37, "section": "2.5 Universidad"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (medidas 95–96 y 209–218), fija como objetivo el mejor resultado en PISA en cuatro años sustituyendo la LOMLOE, implantando PAU común y blindando conciertos.",
+                "points": [
+                    "Sustitución de la LOMLOE, refuerzo en lectura y cálculo en Primaria, exigencia de aprobar asignaturas para pasar de curso en ESO, PAU común y garantía de enseñanza en castellano.",
+                    "Nota mínima en Magisterio, carrera docente, libertad de elección municipal, conciertos de al menos 6 años cubriendo el coste real y garantía de continuidad para educación especial.",
+                    "Gratuidad 0–3 años (50 % Estado/CCAA en públicas y concertadas), becas como derecho legal con FP de alta demanda gratuita y veto a redes sociales a menores de 14 años.",
+                ],
+                "citations": [
+                    {"pdf_page": 32, "doc_page": 32, "section": "3.1 Medidas 95–96"},
+                    {"pdf_page": 51, "doc_page": 51, "section": "4.7 Medidas 209–213"},
+                    {"pdf_page": 52, "doc_page": 52, "section": "4.7 Medidas 215–218"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (compromisos 157–185), propone universalizar 0–3 años, reducir ratios con Estatuto del Docente, ampliar FP y hacer gratuito el primer curso universitario público.",
+                "points": [
+                    "Universalización pública de 0–3 años, comedor gratuito para alumnado vulnerable, límite de ratios con doble cómputo NEE, 1 orientador por cada 250 alumnos y Estatuto del Docente.",
+                    "Más plazas públicas de FP y FP Básica en sectores estratégicos, actualización de umbrales de becas y gratuidad del primer curso de grado en universidades públicas (con Erasmus de hasta 1.000–1.500 €/mes).",
+                    "Ley de Equidad Universitaria con financiación vinculante, requisitos estrictos a universidades privadas y edad mínima de 16 años en redes sociales en su bloque digital.",
+                ],
+                "citations": [
+                    {"pdf_page": 51, "doc_page": 52, "section": "Educación · Comp. 157–162"},
+                    {"pdf_page": 53, "doc_page": 54, "section": "FP · Comp. 170–175"},
+                    {"pdf_page": 54, "doc_page": 55, "section": "Universidad · Comp. 176–184"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (puntos 66–75), plantea unificar currículo, reválidas y EVAU única en español, derogar la LOMLOE, prohibir móviles en clase y aplicar prioridad nacional en ayudas.",
+                "points": [
+                    "Currículo único, reválidas, EVAU única, educación garantizada en español en toda España, derogación de la LOMLOE, prohibición de móviles en clase y refuerzo de autoridad docente.",
+                    "Distrito único, libre elección familiar de centro, prioridad nacional en ayudas, guarderías y becas comedor/transporte, gratuidad 0–3 años y apuesta por la FP.",
+                    "Límite máximo por aula de alumnos sin dominio del español, prohibición de burka/niqab y menús halal en colegios, fin del programa de Lengua Árabe y libertad de cátedra universitaria.",
+                ],
+                "citations": [
+                    {"pdf_page": 41, "doc_page": 41, "section": "Educación · Puntos 66–69"},
+                    {"pdf_page": 42, "doc_page": 42, "section": "Educación · Puntos 70–75"},
+                ],
+            },
+        },
+        "followups": [
+            "¿Qué diferencias hay en sanidad y listas de espera?",
+            "Compara las propuestas de inmigración y fronteras",
+        ],
+    },
+    {
+        "id": "inmigracion",
+        "title": "Inmigración, fronteras y nacionalidad",
+        "exact_triggers": ["inmigracion", "inmigrantes", "migracion", "migraciones", "fronteras", "frontera", "regularizacion", "menas", "ceuta", "melilla", "asilo", "cie"],
+        "keywords": ["extranjeria", "expulsion", "deportacion", "remigracion", "arraigo", "nacionalidad", "burka", "antirracismo"],
+        "key_differences": [
+            "**Regularización y vías de entrada:** Frente Amplio propone culminar la regularización de 2026 y crear un mecanismo permanente de regularización junto a asilo en embajadas; PSOE defiende vías legales y contratación en origen (sin proponer regularización extraordinaria); PP implanta visados por puntos y cupos anuales prohibiendo regularizaciones masivas; VOX prohíbe toda regularización, suprime el arraigo y plantea repatriaciones y un plan de remigración.",
+            "**Control fronterizo y CIE:** Frente Amplio propone cerrar los CIE, derogar el rechazo en frontera y rechazar centros de retorno externos; PSOE apuesta por gestión europea ordenada, cooperación con países de origen y lucha contra mafias; PP refuerza frontera sur con Frontex y apoyo de Fuerzas Armadas si procede, identificación en 7 días y centros de retorno; VOX plantea militarizar permanentemente las fronteras de Ceuta y Melilla y sanciones/revisión diplomática con Marruecos.",
+            "**Integración, ayudas y nacionalidad:** Frente Amplio impulsa Ley Integral Antirracismo, voto municipal y fin de controles por perfil racial; PSOE despliega el Plan de Integración de 500 M€ y la AINODI; PP exige compromiso obligatorio de integración para renovar residencia, prohíbe burka/niqab y endurece la Ley de Nacionalidad; VOX impone prioridad nacional en ayudas e IMV exclusivo para españoles, prohíbe alquiler a irregulares y grava remesas.",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (capítulo 16), prioriza derechos humanos, regularización estable, cierre de los CIE, derogación del rechazo en frontera y Ley Integral Antirracismo.",
+                "points": [
+                    "Culminación de la regularización de 2026, procedimiento permanente en Ley de Extranjería, +30 % de medios en Extranjería (cita en ≤7 días) y Agencia de Asilo con plazos vinculantes.",
+                    "Cierre definitivo de los CIE, derogación del «rechazo en frontera», solicitud de asilo en embajadas y rechazo a centros de retorno en terceros países (recurso ante el TJUE).",
+                    "Ley Integral Antirracismo, prohibición de perfiles raciales policiales, reparto solidario vinculante de menores migrantes y ampliación del voto municipal a residentes.",
+                ],
+                "citations": [
+                    {"pdf_page": 126, "doc_page": 149, "section": "16.1–16.2 Migraciones"},
+                    {"pdf_page": 127, "doc_page": 150, "section": "16.2 Fronteras y asilo"},
+                    {"pdf_page": 128, "doc_page": 151, "section": "16.2 Derechos"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (secciones 1.5, 1.6 y 3.5), plantea autoridad única migratoria, refuerzo fronterizo, visados por puntos y cupos, veto a regularizaciones masivas y compromiso de integración.",
+                "points": [
+                    "Autoridad única migratoria, refuerzo permanente de Policía, Guardia Civil y Frontex (con apoyo militar si lo exige la seguridad nacional), identificación en 7 días y rechazos en frontera en entradas a nado.",
+                    "Visados por puntos y cupos anuales, prohibición legal de regularizaciones masivas, arraigo excepcional y expulsión como regla por delitos graves o multirreincidencia con centros de retorno.",
+                    "Compromiso obligatorio de integración (idioma y Constitución) para renovar residencia, veto a burka/niqab, nueva Ley de Nacionalidad más exigente y ayudas no urgentes sin bastar el mero empadronamiento.",
+                ],
+                "citations": [
+                    {"pdf_page": 18, "doc_page": 18, "section": "1.5 Medidas 35–38"},
+                    {"pdf_page": 19, "doc_page": 19, "section": "1.6 Medidas 40–45"},
+                    {"pdf_page": 39, "doc_page": 39, "section": "3.5 Medidas 140–142"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (págs. 93–94), defiende una migración regular, humana y eficaz con vías laborales ordenadas, 500 M€ para integración, acogida reforzada y lucha contra el odio.",
+                "points": [
+                    "Plan de Integración y Ciudadanía 2026–2030 dotado inicialmente con 500 M€ y fomento de la participación cívica y social.",
+                    "Simplificación de trámites, contratación en origen, homologación ágil de títulos y refuerzo de vías legales de asilo y reasentamiento, junto a gestión europea de fronteras y lucha contra mafias *(sin plantear regularización extraordinaria)*.",
+                    "Unidad de Apoyo a la Infancia Migrante para emergencias autonómicas, acompañamiento a extutelados, activación de la AINODI (Ley Zerolo) y Pacto contra Delitos de Odio.",
+                ],
+                "citations": [
+                    {"pdf_page": 92, "doc_page": 93, "section": "Política migratoria · Comp. 388–389"},
+                    {"pdf_page": 93, "doc_page": 94, "section": "Integración y trato · Comp. 390–395"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (puntos 1, 9–22 y 88), propone militarizar Ceuta y Melilla, prohibir regularizaciones y arraigo, repatriaciones y remigración, y aplicar prioridad nacional en ayudas.",
+                "points": [
+                    "Militarización fronteriza en Ceuta y Melilla, implicación permanente de Fuerzas Armadas en fronteras y sanciones/revisión diplomática hacia Marruecos.",
+                    "Prohibición de regularizaciones masivas, supresión del arraigo, repatriación de irregulares, plan de remigración, deportación por delitos o incompatibilidad cultural y devolución de MENAS.",
+                    "Supresión de fondos a ONG vinculadas a inmigración ilegal, retirada de cooperación a países no colaboradores, prioridad nacional en ayudas e IMV exclusivo para españoles y gravamen a remesas.",
+                ],
+                "citations": [
+                    {"pdf_page": 7, "doc_page": 7, "section": "Ceuta y Melilla · Punto 1"},
+                    {"pdf_page": 15, "doc_page": 15, "section": "Inmigración · Puntos 9–15"},
+                    {"pdf_page": 19, "doc_page": 19, "section": "Prioridad nacional · Puntos 18–22"},
+                ],
+            },
+        },
+        "followups": [
+            "¿Qué diferencias hay en seguridad, justicia y Defensa?",
+            "Compara las propuestas de vivienda y sanidad",
+        ],
+    },
+    {
+        "id": "empleo_salarios_jornada",
+        "title": "Empleo, salarios, SMI y jornada laboral",
+        "exact_triggers": ["empleo", "trabajo", "salarios", "salario", "smi", "salario minimo", "jornada", "jornada laboral", "despido", "paro", "desempleo"],
+        "keywords": ["37,5", "32 horas", "35 horas", "contratos", "temporalidad", "fijos discontinuos", "registro horario"],
+        "key_differences": [
+            "**Jornada laboral semanal:** Frente Amplio plantea implantar de inmediato 37,5 h (35 h en sector público) avanzando hacia las 32 horas semanales sin recorte salarial; PSOE compromete completar las 37,5 h e incentivar avances negociados hacia 35 h; PP no reduce la jornada semanal legal y propone bancos de horas y horarios flexibles; VOX no incluye medidas sobre duración de jornada.",
+            "**Salario Mínimo (SMI) y salarios:** Frente Amplio y PSOE blindan por ley el SMI en ≥60 % del salario medio sin absorción de pluses (y exento de IRPF); PP no fija subidas ni congelaciones del SMI pero garantiza por ley que el mínimo exento del IRPF suba automáticamente con el SMI; VOX defiende salarios dignos vía rebaja fiscal y productividad sin propuestas sobre cuantía del SMI.",
+            "**Reforma laboral y despido:** Frente Amplio y PSOE reforman el despido improcedente conforme a la Carta Social Europea (Frente Amplio recupera además autorización previa en ERE y sube el paro al 80 % los primeros 6 meses); PP incentiva con menos cotizaciones a empresas con plantillas estables y refuerza mutuas en bajas; VOX propone derogar la legislación laboral del Gobierno de Pedro Sánchez.",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (secciones 4.1 y 13.1), plantea 37,5 h inmediatas rumbo a 32 h, SMI blindado al 60 % neto, despido reparador, paro al 80 % y democracia empresarial.",
+                "points": [
+                    "Jornada inmediata de 37,5 h (35 h públicas) con senda hacia las 32 horas semanales sin bajada salarial y registro horario accesible en tiempo real por la Inspección.",
+                    "SMI legal del 60 % del salario medio neto sin absorción, cláusulas salariales al IPC y gravamen del 30 % al exceso de beneficio si grandes empresas (>50 M€) no suben salarios.",
+                    "Despido improcedente reparador, autorización previa en ERE, prestación por desempleo al 80 % los 6 primeros meses, Plan de Empleo Garantizado y representación laboral en consejos de administración.",
+                ],
+                "citations": [
+                    {"pdf_page": 51, "doc_page": 57, "section": "4.1 Salarios"},
+                    {"pdf_page": 52, "doc_page": 58, "section": "4.1 Jornada y registro"},
+                    {"pdf_page": 53, "doc_page": 59, "section": "4.1 Despido y paro"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (secciones 4.2 y 4.3), apuesta por flexibilidad horaria con bancos de horas, cheque de formación en IA, menos cotizaciones por estabilidad y exención fiscal del SMI.",
+                "points": [
+                    "Sin reducir la jornada legal semanal, extiende bancos de horas para conciliar, horarios flexibles y teletrabajo; cheque individual y portátil de formación en IA para cada trabajador.",
+                    "Menores cotizaciones por desempleo a empresas con mayor estabilidad que su sector, publicación mensual de fijos discontinuos inactivos y refuerzo de Seguridad Social y mutuas para agilizar bajas.",
+                    "Exención automática por ley en el IRPF con cada subida del SMI *(sin propuestas de subida o congelación directa de su cuantía; la medida 173 está reservada para campaña)*.",
+                ],
+                "citations": [
+                    {"pdf_page": 44, "doc_page": 44, "section": "4.2 Medida 162"},
+                    {"pdf_page": 45, "doc_page": 45, "section": "4.3 Medida 169"},
+                    {"pdf_page": 46, "doc_page": 46, "section": "4.3 Medidas 174–175"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (págs. 38–44), propone completar las 37,5 h rumbo a 35 h, blindar el SMI >60 %, reformar el despido improcedente y aprobar el Estatuto del Becario.",
+                "points": [
+                    "Reducción de jornada a 37,5 h sin pérdida salarial (con transitorias para pymes), impulso negociado hacia 35 h y registro horario digital con desconexión.",
+                    "Blindaje legal del SMI por encima del 60 % del salario medio (exento de IRPF y sin absorción por pluses) y reparto de productividad con las plantillas.",
+                    "Reforma del despido improcedente conforme a la Carta Social Europea, recuperación de salarios de tramitación, límite a parcialidad involuntaria >80 %, Estatuto del Becario y Plan Nuevo Rumbo 45+.",
+                ],
+                "citations": [
+                    {"pdf_page": 37, "doc_page": 38, "section": "Coste de vida · Comp. 87–92"},
+                    {"pdf_page": 41, "doc_page": 42, "section": "Trabajo digno · Comp. 108–111"},
+                    {"pdf_page": 42, "doc_page": 43, "section": "Trabajo digno · Comp. 113–119"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (puntos 2, 8 y 99), plantea derogar la legislación laboral vigente, reducir cuotas a autónomos y combatir la brecha maternal, sin medidas sobre jornada o SMI.",
+                "points": [
+                    "Derogación de la legislación laboral aprobada por el Gobierno de Pedro Sánchez para promover empleo estable y salarios dignos.",
+                    "Cuota de autónomos de 0 € bajo el SMI (desde 50 € al superarlo), planes de retorno de trabajadores emigrados y medidas de conciliación contra la brecha maternal.",
+                    "*(Nota de verificación: el programa no incluye propuestas concretas sobre reducción de jornada laboral, indemnización por despido ni cuantía del SMI).*",
+                ],
+                "citations": [
+                    {"pdf_page": 12, "doc_page": 12, "section": "Economía · Punto 8"},
+                    {"pdf_page": 9, "doc_page": 9, "section": "Economía · Punto 2"},
+                    {"pdf_page": 52, "doc_page": 52, "section": "Familia · Punto 99"},
+                ],
+            },
+        },
+        "followups": [
+            "¿Qué diferencias hay en las pensiones?",
+            "Compara las propuestas para autónomos y pymes",
+        ],
+    },
+    {
+        "id": "autonomos_pymes",
+        "title": "Autónomos y pymes",
+        "exact_triggers": ["autonomo", "autonomos", "pyme", "pymes", "emprendedor", "emprendedores", "cuota autonomos"],
+        "keywords": ["reta", "iva franquiciado", "tarifa plana", "cese de actividad", "mutualidades", "burocracia"],
+        "key_differences": [
+            "**Cuota de cotización:** VOX propone 0 € de cuota por debajo del SMI y progresiva desde 50 € al superarlo; PP plantea cuota cero el 1.er año (y 2.º si no alcanzan el SMI) más bonificación 100 % durante 2 años tras maternidad/paternidad y desde el día 1 en enfermedad grave; Frente Amplio mantiene tarifa plana de 88 € bajo el SMI; PSOE desarrolla la pasarela de mutualistas al RETA (Ley 2/2026) y profundiza en la cotización por ingresos reales.",
+            "**IVA y declaraciones:** Frente Amplio y PP coinciden en implantar el IVA franquiciado (exención de declarar IVA por debajo de 85.000 €/año de facturación; PP además pasa declaraciones de trimestrales a semestrales); PSOE y VOX priorizan simplificación administrativa («Régimen 20» en PSOE; «3 por 1» y Unidad de Mercado en VOX).",
+            "**Financiación y protección:** Frente Amplio ofrece 3.000 M€/año ICO (euríbor + 1 %) y contratos mínimos de 5 años en locales comerciales; PP bonifica 100 % la contratación del primer trabajador, protege la vivienda habitual y amplía Segunda Oportunidad; PSOE extiende el Bono IA y simplifica el cese de actividad; VOX fomenta IA e I+D+i en pymes y recorta impuestos generales.",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (capítulo 08), propone IVA franquiciado hasta 85.000 €, tarifa plana de 88 € bajo el SMI, financiación ICO y protección en alquileres comerciales.",
+                "points": [
+                    "Transposición inmediata del IVA franquiciado (<85.000 €/año), efectividad del IVA de caja y tarifa plana de 88 € mientras los ingresos reales no superen el SMI.",
+                    "Línea ICO de 3.000 M€/año (euríbor + 1 %) para empresas de <50 trabajadores, reforma de la LAU con contratos mínimos de 5 años en locales comerciales y ampliación del cese de actividad.",
+                ],
+                "citations": [
+                    {"pdf_page": 92, "doc_page": 103, "section": "8.1 Autónomos y pymes"},
+                    {"pdf_page": 93, "doc_page": 104, "section": "8.1–8.3 Economía social"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (medidas 170–172 y 187), exime de IVA hasta 85.000 €, reduce declaraciones, aplica cuota cero inicial y bonifica la contratación.",
+                "points": [
+                    "Exención de cobrar y declarar IVA si facturan <85.000 €, paso a declaraciones semestrales (una anual al iniciar), cuota cero el 1.er año (y 2.º bajo el SMI) y protección de la vivienda habitual.",
+                    "Bonificación del 100 % de cotizaciones el 1.er año por el primer trabajador (50 % por el segundo), bonificación desde el día 1 en enfermedad grave, 2 años gratis tras permiso de nacimiento y recorte del 35 % de cargas a pymes.",
+                ],
+                "citations": [
+                    {"pdf_page": 46, "doc_page": 46, "section": "4.3 Medidas 170–172"},
+                    {"pdf_page": 48, "doc_page": 48, "section": "4.5 Medida 187"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (compromisos 4, 16 y 116–117), actualiza el Estatuto del Trabajo Autónomo, desarrolla la pasarela al RETA e impulsa la digitalización con Bono IA y Régimen 20.",
+                "points": [
+                    "Desarrollo de la pasarela al RETA (Ley 2/2026) reconociendo fondos de mutualidades alternativas, avance en cotización por ingresos reales, simplificación del cese de actividad y ampliación de permisos retribuidos a autónomos.",
+                    "Simplificación territorial vía «Régimen 20», financiación del Fondo España Crece para pymes y ampliación del Bono IA y Red NEURONA.",
+                ],
+                "citations": [
+                    {"pdf_page": 42, "doc_page": 43, "section": "Trabajo digno · Comp. 116–117"},
+                    {"pdf_page": 15, "doc_page": 16, "section": "Modelo productivo · Comp. 4"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (puntos 2, 37 y 42), propone cuota cero bajo el SMI, cuota progresiva desde 50 €, Unidad de Mercado y rebaja fiscal general.",
+                "points": [
+                    "Cuota de 0 euros para autónomos con ingresos por debajo del SMI y escala progresiva desde 50 euros al superarlo.",
+                    "Ley de Unidad de Mercado frente a 17 normativas autonómicas, regla «3 por 1» de desregulación, silencio positivo e incentivos para implantar IA e I+D+i en pymes y autónomos.",
+                ],
+                "citations": [
+                    {"pdf_page": 9, "doc_page": 9, "section": "Economía · Punto 2"},
+                    {"pdf_page": 27, "doc_page": 27, "section": "Desregulación · Puntos 36–37"},
+                    {"pdf_page": 28, "doc_page": 28, "section": "Desregulación · Punto 42"},
+                ],
+            },
+        },
+        "followups": [
+            "¿Qué diferencias hay en impuestos (IRPF e IVA)?",
+            "Compara empleo, salarios y jornada laboral",
+        ],
+    },
+    {
+        "id": "energia_clima",
+        "title": "Energía nuclear, renovables y transición ecológica",
+        "exact_triggers": ["energia", "nuclear", "nucleares", "renovables", "cambio climatico", "transicion ecologica", "pacto verde", "electricidad", "luz", "factura", "zbe"],
+        "keywords": ["almaraz", "apagon", "hidrogeno", "agenda 2030", "emisiones", "bono social", "solar", "eolica"],
+        "key_differences": [
+            "**Energía nuclear:** Frente Amplio y PSOE mantienen el calendario de cierre nuclear (Frente Amplio cita Almaraz I y II en 2027–2028; PSOE mantiene cierre hasta 2035 con transición justa); PP deroga el calendario de cierre prorrogando las centrales actuales y participa en reactores modulares; VOX deroga el calendario de cierre e impulsa estudios para construir nuevas centrales nucleares.",
+            "**Pacto Verde, renovables y regulación climática:** Frente Amplio compromete el 3,5 % del PIB anual hacia el 100 % renovable en 2040 con titularidad pública de redes y comercializadora pública; PSOE fija 81 % renovable en 2030 y despliega el Plan Social del Clima (>9.000 M€); PP defiende neutralidad tecnológica revisando ritmos de descarbonización sin cargas extra; VOX propone revertir normativas del Pacto Verde/Agenda 2030 (motores de combustión, tasas CO2, ZBE) y frenar macroplantas renovables.",
+            "**Factura eléctrica e impuestos:** PP suprime el impuesto del 7 % a la producción eléctrica y crea una Tarifa Social Única; VOX plantea una «bajada masiva» de impuestos eléctricos; PSOE crea un bono social único y automático y reforma el mercado europeo; Frente Amplio implanta IVA eléctrico progresivo desde 0 %, 3 horas diarias de luz gratuita solar y reforma del sistema marginalista.",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (sección 5.1), invierte el 3,5 % del PIB anual en transición ecológica, cumple el cierre nuclear y refuerza el control público energético.",
+                "points": [
+                    "Cumplimiento del cierre nuclear (Almaraz 2027–2028) con costes a cargo de las empresas y meta de 100 % electricidad renovable en 2040 (81 % en 2030), retirando fondos públicos al H2Med.",
+                    "Titularidad pública de redes eléctricas y gasistas, gestión pública de hidroeléctricas al vencer concesiones, comercializadora pública y Fondo Generacional (30 % público en nuevas renovables).",
+                    "3 horas diarias de luz solar gratuita, IVA eléctrico progresivo (0–21 %), Plan de Tejados Solares obligatorio antes de 2030 y reforma del mercado marginalista.",
+                ],
+                "citations": [
+                    {"pdf_page": 60, "doc_page": 67, "section": "Cap. 05 Transición ecológica"},
+                    {"pdf_page": 62, "doc_page": 69, "section": "5.1 Energía limpia y pública"},
+                    {"pdf_page": 64, "doc_page": 71, "section": "5.1 Nuclear y redes"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (sección 4.9), apuesta por neutralidad tecnológica, prórroga de centrales nucleares, supresión del impuesto eléctrico del 7 % y refuerzo contra apagones.",
+                "points": [
+                    "Fin del calendario de cierre de Almaraz, Ascó, Vandellós, Cofrentes y Trillo (prórroga en 100 días con el CSN) y participación en pequeños reactores modulares.",
+                    "Supresión inmediata del impuesto del 7 % a la producción eléctrica, reducción de costes de ajuste del sistema y Tarifa Social Única compatible con cualquier contrato.",
+                    "Plan de choque en 18 meses para acceso a redes, nuevas reglas en 6 meses contra apagones (sin cerrar respaldo de gas/hidro sin alternativa) y revisión de ritmos de descarbonización.",
+                ],
+                "citations": [
+                    {"pdf_page": 54, "doc_page": 54, "section": "4.9 Medidas 228–230"},
+                    {"pdf_page": 55, "doc_page": 55, "section": "4.9 Medidas 231–233"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (págs. 64–67), propone alcanzar el 81 % renovable en 2030, mantener el cierre nuclear hasta 2035 y desplegar el Plan Social para el Clima (>9.000 M€).",
+                "points": [
+                    "81 % de electricidad renovable en 2030, plan nacional de bombeo hidroeléctrico, refuerzo de redes y extensión de la red troncal de hidrógeno verde e interconexiones con Francia.",
+                    "Mantenimiento del calendario de cierre nuclear hasta 2035 con planes de transición justa en las comarcas afectadas.",
+                    "Reforma del mercado eléctrico europeo, bono social único y automático (luz, gas, agua, transporte y telecos) y despliegue del Plan Social para el Clima (>9.000 M€).",
+                ],
+                "citations": [
+                    {"pdf_page": 65, "doc_page": 66, "section": "Economía verde · Comp. 234–238"},
+                    {"pdf_page": 66, "doc_page": 67, "section": "Economía verde · Comp. 239–242"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (puntos 8, 44 y 54), plantea recuperar y ampliar el parque nuclear, rebajar impuestos eléctricos, explotar recursos propios y revertir el Pacto Verde.",
+                "points": [
+                    "Derogación del calendario de cierre nuclear y estudios urgentes para construir nuevas centrales nucleares en emplazamientos adyacentes a las existentes.",
+                    "Bajada masiva de impuestos a la electricidad, fin del tope a inversión en redes eléctricas y eliminación de trabas para explotar recursos naturales y minerales nacionales.",
+                    "Reversión de normas del Pacto Verde y Agenda 2030 (veto a motores de combustión, impuestos al CO2 y Zonas de Bajas Emisiones) y freno a macroplantas renovables sobre suelo agrario.",
+                ],
+                "citations": [
+                    {"pdf_page": 11, "doc_page": 11, "section": "Economía y energía · Punto 8"},
+                    {"pdf_page": 12, "doc_page": 12, "section": "Plan nuclear · Punto 8"},
+                    {"pdf_page": 29, "doc_page": 29, "section": "Desregulación · Punto 44"},
+                ],
+            },
+        },
+        "followups": [
+            "¿Qué diferencias hay sobre agua, agricultura y mundo rural?",
+            "Compara las propuestas de transporte y trenes",
+        ],
+    },
+    {
+        "id": "rural_agricultura_agua",
+        "title": "Agricultura, agua y mundo rural",
+        "exact_triggers": ["agricultura", "ganaderia", "pesca", "campo", "mundo rural", "sector primario", "agua", "pac", "mercosur", "regadio", "despoblacion", "lobo"],
+        "keywords": ["trasvases", "embalses", "caza", "incendios", "cadena alimentaria", "macrogranjas"],
+        "key_differences": [
+            "**Gestión del agua y regadíos:** VOX propone un Plan Nacional del Agua con interconexión de todas las cuencas y obras hidráulicas; PP plantea un Pacto Nacional del Agua de hasta 40.000 M€ hasta 2030 ampliando regadíos, desalación y reutilización; PSOE blinda el agua potable en la Constitución, crea bancos públicos de agua y moderniza regadíos sin subir consumo; Frente Amplio establece gestión 100 % pública del agua, cierra pozos ilegales, impone canon al regadío industrial y decreta moratoria a nuevos embalses y trasvases.",
+            "**Modelo agrario y comercio (PAC y Mercosur):** Frente Amplio impulsa transición agroecológica (25 % ecológico en 2030), veta nuevas macrogranjas, elimina derechos históricos de la PAC y pide salvaguardas en Mercosur; PSOE prioriza agricultura familiar, bancos de tierras y reciprocidad en importaciones; PP defiende PAC sin recortes (2028–2034), baja impuestos rurales, protege a ganaderos frente al lobo y apoya la caza; VOX rechaza explícitamente UE-Mercosur, revierte exigencias climáticas de la PAC y defiende la caza.",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (secciones 5.6, 7 y 9), plantea reconversión agroecológica, control sancionador de precios, agua 100 % pública con moratoria a trasvases y servicios a <30 minutos.",
+                "points": [
+                    "25 % de superficie agraria ecológica en 2030 (100 % en 2050), veto a nuevas macrogranjas, reforma de la PAC sin derechos históricos ni fondos de inversión y banco público de tierras.",
+                    "Agua 100 % pública directa con mínimo vital gratuito, canon al regadío industrial, cierre de >1 millón de pozos ilegales y moratoria a nuevos embalses y trasvases.",
+                    "Garantía legal de servicios rurales a menos de 30 minutos, bonificaciones de cotizaciones en zonas despobladas y cuerpo civil climático contra incendios.",
+                ],
+                "citations": [
+                    {"pdf_page": 73, "doc_page": 80, "section": "5.6 Agua como bien público"},
+                    {"pdf_page": 87, "doc_page": 97, "section": "7.1–7.2 Agricultura y ganadería"},
+                    {"pdf_page": 97, "doc_page": 109, "section": "9.1 Despoblación"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (secciones 3.3 y 4.6), propone un Pacto Nacional del Agua de hasta 40.000 M€, PAC sin recortes, bajada fiscal rural y protección ganadera frente al lobo.",
+                "points": [
+                    "Pacto Nacional del Agua de hasta 40.000 M€ hasta 2030 para renovar y ampliar regadíos, desalación, reutilización y limpieza de cauces.",
+                    "Defensa de PAC, Pesca y POSEI sin recortes (2028–2034), anticipo del 70 % de ayudas PAC a jóvenes, reciprocidad en importaciones, equilibrio frente al lobo y respaldo a la caza sostenible.",
+                    "Bajada de impuestos rurales, exención fiscal de vivienda joven en pueblos despoblados y ayudas directas a municipios de <250 habitantes.",
+                ],
+                "citations": [
+                    {"pdf_page": 37, "doc_page": 37, "section": "3.3 Medida 126"},
+                    {"pdf_page": 49, "doc_page": 49, "section": "4.6 Medidas 195–198"},
+                    {"pdf_page": 50, "doc_page": 50, "section": "4.6 Medidas 199–206"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (págs. 68–72), impulsa la Ley de Agricultura Familiar, blindaje constitucional del agua potable con bancos de agua y el «País de los 30 minutos».",
+                "points": [
+                    "PAC orientada a explotaciones familiares y profesionales con reciprocidad ambiental/laboral en importaciones, Ley de Agricultura Familiar y freno a la compra de tierras por fondos.",
+                    "Blindaje constitucional del acceso al agua potable con mínimo vital, bancos públicos de agua, más desalación/reutilización renovable y regadíos de precisión sin aumentar consumo total.",
+                    "Garantía rural en leyes y presupuestos hacia el «País de los 30 minutos», Plan de Empleo Verde Rural, pediatría y escuela rural y oficinas itinerantes de la AGE.",
+                ],
+                "citations": [
+                    {"pdf_page": 68, "doc_page": 69, "section": "Agua · Comp. 260–264"},
+                    {"pdf_page": 69, "doc_page": 70, "section": "Agroganadería · Comp. 267–271"},
+                    {"pdf_page": 70, "doc_page": 71, "section": "Mundo rural · Comp. 275–279"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (puntos 48–59 y 115), rechaza el acuerdo UE-Mercosur y el Pacto Verde en el campo y propone un Plan Nacional del Agua con interconexión de cuencas.",
+                "points": [
+                    "Rechazo frontal a UE-Mercosur, cláusulas espejo, preferencia comunitaria, fondo de compensación ante imposiciones europeas y defensa de la PAC vinculada a la despoblación.",
+                    "Plan Nacional del Agua basado en la interconexión de todas las cuencas para modernizar regadíos y culminar obras contra inundaciones.",
+                    "Fiscalidad mínima en zonas despobladas, silencio positivo en trámites rurales, limpieza de montes contra incendios y defensa de la caza.",
+                ],
+                "citations": [
+                    {"pdf_page": 33, "doc_page": 33, "section": "Sector primario · Puntos 48–51"},
+                    {"pdf_page": 34, "doc_page": 34, "section": "Sector primario · Puntos 52–55"},
+                    {"pdf_page": 61, "doc_page": 61, "section": "Infraestructuras · Puntos 114–115"},
+                ],
+            },
+        },
+        "followups": [
+            "¿Qué diferencias hay en energía nuclear y transición ecológica?",
+            "Compara las propuestas de familia y natalidad",
+        ],
+    },
+    {
+        "id": "familia_cuidados",
+        "title": "Familia, crianza, natalidad y cuidados",
+        "exact_triggers": ["familia", "familias", "natalidad", "crianza", "hijos", "conciliacion", "cuidados", "dependencia", "permisos", "maternidad", "paternidad", "guarderias"],
+        "keywords": ["0-3", "escuelas infantiles", "monoparental", "aborto", "vida", "cuenta de futuro"],
+        "key_differences": [
+            "**Prestaciones y deducciones por hijo:** Frente Amplio propone una Prestación Universal por Crianza de 200 €/mes por cada menor de 18 años; PSOE crea una prestación estatal progresiva por crianza (8 millones de menores) más una Cuenta de Futuro de 1.000 € al nacer; PP refunde deducciones familiares en un abono mensual reembolsable y actualiza mínimos con la inflación; VOX extiende beneficios de familia numerosa desde el primer hijo con rebajas en IRPF y bonificación del 100 % en ayuda a domicilio.",
+            "**Permisos y cotización por cuidados:** Frente Amplio eleva permisos de nacimiento a 20 semanas y retribuye hasta 10 semanas del parental; PSOE retribuye 4 semanas del permiso parental al 100 % y suma 1 semana por uso no solapado; PP amplía permisos en diálogo social, crea bancos de horas y cotiza por cuidadores de dependientes; VOX crea cotización estatal a la Seguridad Social para padres/madres dedicados al cuidado de hijos.",
+            "**Educación 0–3 años y derechos reproductivos:** Los cuatro partidos incluyen la gratuidad 0–3 años (Frente Amplio y PSOE vía plazas públicas; PP cofinanciando 50 % plazas públicas y concertadas; VOX en su Plan de Natalidad). En derechos reproductivos, Frente Amplio y PSOE blindan constitucionalmente el aborto (art. 43 CE); VOX defiende el derecho a la vida desde la concepción hasta la muerte natural.",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (secciones 2.1, 2.2 y 2.8), crea una Prestación Universal por Crianza de 200 €/mes, amplía permisos y duplica la inversión en dependencia.",
+                "points": [
+                    "Prestación Universal por Crianza de 200 €/mes por cada menor de 18 años (vía IRPF reembolsable financiada con Tasa Zucman) y gratuidad pública de 0–3 años.",
+                    "Permisos por nacimiento de 20 semanas intransferibles y retribución al 100 % progresiva hasta 10 semanas del permiso parental (hasta los 12 años).",
+                    "Inversión en dependencia al 1,7 % del PIB en 2030 sin copagos, «derecho al respiro» (1 mes/año), Ley de Familias y blindaje constitucional del aborto.",
+                ],
+                "citations": [
+                    {"pdf_page": 21, "doc_page": 25, "section": "2.1 Prestación crianza"},
+                    {"pdf_page": 24, "doc_page": 28, "section": "2.2 Cuidados y permisos"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (medidas 114 y 158–165), plantea abono mensual reembolsable de deducciones familiares, gratuidad 0–3 años al 50 % con CCAA y Pacto por la Dependencia.",
+                "points": [
+                    "Refundición de deducciones familiares en un abono mensual reembolsable, actualización de mínimos con la inflación, cómputo del concebido no nacido y apoyo a fertilidad/reproducción asistida.",
+                    "Gratuidad universal de escuelas infantiles 0–3 años (públicas y concertadas, financiadas 50 % Estado / 50 % CCAA) y 2 años de cuota gratis a autónomos tras permiso de nacimiento.",
+                    "Pacto de Estado por la Dependencia (50 % estatal efectivo), deducción del 40 % por cuidados profesionales y cotización estatal para cuidadores familiares.",
+                ],
+                "citations": [
+                    {"pdf_page": 43, "doc_page": 43, "section": "4.2 Medida 158"},
+                    {"pdf_page": 44, "doc_page": 44, "section": "4.2 Medidas 159–163"},
+                    {"pdf_page": 35, "doc_page": 35, "section": "3.2 Medida 114"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (págs. 57–60 y 81), propone una prestación estatal por crianza, Cuenta de Futuro de 1.000 €, 4 semanas retribuidas del permiso parental y Ley de Servicios Sociales.",
+                "points": [
+                    "Prestación estatal progresiva por crianza para los 8 millones de menores y Cuenta de Futuro pública de 1.000 € al nacer utilizable desde los 18 años.",
+                    "Retribución al 100 % de 4 semanas del permiso parental (<8 años), 1 semana adicional por uso no solapado, adaptación de jornada hasta los 16 años y universalización pública de 0–3 años.",
+                    "Ley de Servicios Sociales, despliegue de Ley 4/2026 de Dependencia (sin copagos en ELA Grado III+), equiparación de cuidadoras al SMI y Ley de Familias.",
+                ],
+                "citations": [
+                    {"pdf_page": 56, "doc_page": 57, "section": "Infancia y familias · Comp. 192–199"},
+                    {"pdf_page": 57, "doc_page": 58, "section": "Dependencia · Comp. 202–209"},
+                    {"pdf_page": 80, "doc_page": 81, "section": "Corresponsabilidad · Comp. 325–326"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (puntos 94–99), impulsa un Plan Nacional de Natalidad desde el primer hijo, cotización estatal por cuidado de hijos, gratuidad 0–3 y defensa de la vida.",
+                "points": [
+                    "Extensión de beneficios de familia numerosa desde el 1.er hijo, rebaja del IRPF por hijos, bonificación del 100 % de ayuda en el hogar y gratuidad real de 0 a 3 años.",
+                    "Cotización a la Seguridad Social financiada por el Estado para españoles dedicados al cuidado de sus hijos y medidas contra la brecha maternal.",
+                    "Defensa del derecho a la vida desde la concepción hasta la muerte natural, cuidados paliativos y refuerzo del presupuesto de dependencia y discapacidad.",
+                ],
+                "citations": [
+                    {"pdf_page": 51, "doc_page": 51, "section": "Familia y Vida · Punto 94"},
+                    {"pdf_page": 52, "doc_page": 52, "section": "Familia y Vida · Puntos 95–99"},
+                ],
+            },
+        },
+        "followups": [
+            "¿Qué diferencias hay en las pensiones?",
+            "Compara las propuestas de educación 0–3 años y becas",
+        ],
+    },
+    {
+        "id": "justicia_seguridad_defensa",
+        "title": "Seguridad, Justicia, corrupción y Defensa",
+        "exact_triggers": ["justicia", "seguridad", "policia", "guardia civil", "cgpj", "corrupcion", "defensa", "otan", "ejercito", "delincuencia", "multirreincidencia", "amnistia", "ley mordaza"],
+        "keywords": ["jueces", "fiscales", "indultos", "sedicion", "prision", "gasto militar", "tribunal constitucional"],
+        "key_differences": [
+            "**CGPJ y Fiscalía:** PP y VOX proponen que jueces y magistrados elijan directamente a los 12 vocales judiciales del CGPJ y limitar el rol político del TC; Frente Amplio desbloquea el CGPJ por mayoría absoluta parlamentaria tras 2 meses sin 3/5 y crea acceso judicial becado; PSOE propone una nueva LECrim con instrucción por Fiscalía (mandato de 5 años) y pruebas de acceso anonimizadas.",
+            "**Seguridad ciudadana y Código Penal:** Frente Amplio deroga la Ley Mordaza y prohíbe pelotas de goma; PSOE sustituye la LO 4/2015 con cámaras corporales y suprime el Código Penal Militar a la Guardia Civil; PP y VOX endurecen penas frente a multirreincidencia, disturbios, corrupción y terrorismo, recuperan la sedición y prohíben indultos por corrupción o delitos contra el orden constitucional (PP deroga además la Ley de Amnistía).",
+            "**Defensa y gasto militar:** Frente Amplio y PSOE rechazan elevar el gasto militar al 5 % del PIB (Frente Amplio propone reducir partidas militares; PSOE moderniza las Fuerzas Armadas dentro de la UE de la Defensa); PP aprueba una ley plurianual de financiación de Defensa reforzando el pilar europeo de la OTAN; VOX aumenta inversión y medios de Fuerzas Armadas sin mencionar porcentaje del PIB ni OTAN. Los cuatro programas contemplan mejoras o reconocimiento de profesión de riesgo/penosidad para Policía Nacional y Guardia Civil.",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (capítulos 17 y 18), plantea desbloqueo parlamentario del CGPJ, Oficina Anticorrupción, derogación de la Ley Mordaza y reducción del gasto militar.",
+                "points": [
+                    "Desbloqueo del CGPJ (mayoría absoluta tras 2 meses sin 3/5), más plazas hasta la media europea de jueces y acceso becado; Oficina Independiente Anticorrupción y veto de 20 años a empresas condenadas.",
+                    "Derogación íntegra de la Ley Mordaza, prohibición de pelotas de goma y perfiles raciales, desmilitarización de la Guardia Civil y reconocimiento de profesión de riesgo y equiparación a FCSE.",
+                    "Rechazo al 5 % del PIB militar OTAN, reducción efectiva del gasto militar hacia seguridad humana, firma del TPAN y embargo de armas a Israel.",
+                ],
+                "citations": [
+                    {"pdf_page": 130, "doc_page": 155, "section": "17.1 Seguridad humana"},
+                    {"pdf_page": 141, "doc_page": 168, "section": "18.2–18.4 Corrupción y FCSE"},
+                    {"pdf_page": 148, "doc_page": 175, "section": "18.7 Reforma judicial"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (secciones 1.4, 1.8 y 2.1–2.4), propone elección judicial del CGPJ, derogación de la Amnistía, mano dura contra multirreincidencia y ley plurianual de Defensa.",
+                "points": [
+                    "Elección por jueces de los 12 vocales judiciales del CGPJ, 5 años de incompatibilidad tras cargos políticos y mandato único de 5 años para el Fiscal General con informe vinculante del CGPJ.",
+                    "Derogación de la Ley de Amnistía, prohibición de indultos por corrupción o delitos contra el Estado, recuperación de sedición y elecciones automáticas tras dos prórrogas presupuestarias.",
+                    "Juicios rápidos contra multirreincidencia, unidad en frontera sur, profesión de riesgo para FCSE y militares y ley plurianual de financiación de Defensa.",
+                ],
+                "citations": [
+                    {"pdf_page": 15, "doc_page": 15, "section": "1.4 Seguridad · Med. 19–32"},
+                    {"pdf_page": 21, "doc_page": 21, "section": "1.8 Defensa · Med. 52–55"},
+                    {"pdf_page": 26, "doc_page": 26, "section": "2.3 Justicia · Med. 65–72"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (págs. 100–103 y 113), plantea nueva LECrim con Fiscalía de 5 años, Agencia de Integridad Pública, sustitución de la LO 4/2015 y Defensa europea sin llegar al 5 % PIB.",
+                "points": [
+                    "Juicios de despido/desahucio en 3 meses, desalojos ilegales en 48 h, nueva LECrim con instrucción fiscal y mandato de 5 años sin instrucciones del Gobierno, Agencia Anticorrupción y fin de aforamientos ajenos al cargo.",
+                    "Sustitución de la LO 4/2015 (cámaras corporales), fin del Código Penal Militar en funciones policiales de la Guardia Civil, Plan contra el Narcotráfico y protección ante ciberestafas.",
+                    "Rechazo al 5 % del PIB militar, impulso a la Unión Europea de la Defensa y modernización tecnológica de Fuerzas Armadas y UME.",
+                ],
+                "citations": [
+                    {"pdf_page": 99, "doc_page": 100, "section": "Seguridad · Comp. 425–431"},
+                    {"pdf_page": 100, "doc_page": 101, "section": "Justicia · Comp. 434–438"},
+                    {"pdf_page": 112, "doc_page": 113, "section": "Defensa · Comp. 493–500"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (puntos 79–93 y 100–109), propone CGPJ elegido por jueces, responsabilidad patrimonial por corrupción, endurecimiento penal y refuerzo de Defensa, FCSE y OCON Sur.",
+                "points": [
+                    "12 vocales judiciales del CGPJ elegidos por jueces, independencia fiscal, límite al rol político del TC, responsabilidad patrimonial total por corrupción y prohibición de indultos por corrupción o contra la unidad nacional.",
+                    "Ampliación de prisión permanente revisable, rebaja de edad penal del menor, recuperación de sedición, ilegalización de partidos separatistas y derogación de Ley de Memoria y leyes de género.",
+                    "Mayor inversión y profesión de riesgo para Fuerzas Armadas, Policía, Guardia Civil y prisiones, restablecimiento inmediato del OCON Sur y presión diplomática sobre Gibraltar.",
+                ],
+                "citations": [
+                    {"pdf_page": 45, "doc_page": 45, "section": "Seguridad y Defensa · Puntos 79–88"},
+                    {"pdf_page": 55, "doc_page": 55, "section": "Justicia · Puntos 100–107"},
+                ],
+            },
+        },
+        "followups": [
+            "¿Qué diferencias hay sobre modelo de Estado y financiación autonómica?",
+            "Compara las propuestas de inmigración y fronteras",
+        ],
+    },
+    {
+        "id": "estado_autonomias",
+        "title": "Modelo de Estado y financiación autonómica",
+        "exact_triggers": ["financiacion autonomica", "autonomias", "modelo territorial", "modelo de estado", "condonacion", "republica", "monarquia", "senado", "ccaa", "dumping fiscal"],
+        "keywords": ["deuda autonomica", "territorial", "competencias", "unidad nacional", "federal", "cpff"],
+        "key_differences": [
+            "**Forma de Estado y organización territorial:** Frente Amplio plantea avanzar hacia una República Federal plurinacional con derecho a decidir; PSOE defiende el Estado autonómico reforzando la cogobernanza y un Senado territorial; PP defiende el Estado de las Autonomías constitucional reforzando la presencia estatal y prohibiendo cesiones de competencias exclusivas; VOX no plantea explícitamente abolir las CCAA, pero propone Ley de Unidad de Mercado, estándares comunes en Sanidad/Educación e ilegalizar partidos que atenten contra la unidad territorial.",
+            "**Financiación autonómica y condonación de deuda:** Frente Amplio inyecta +2,3 % del PIB (~38.000 M€) y condona deuda condicionada a prohibir el dumping fiscal (mínimos en Patrimonio/Sucesiones); PSOE aporta +21.000 M€ del nuevo sistema CPFF y asume 83.000 M€ de deuda autonómica; PP negocia multilateralmente en el CPFF con fondo de nivelación, veta regímenes singulares bilaterales y rechaza condonar deuda haciendo responsable a cada comunidad; VOX prioriza auditoría del gasto, igualdad de servicios y unidad de mercado sin detallar reforma del sistema de financiación autonómica.",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (capítulos 11, 12 y 18), propone avanzar hacia una República Federal, inyectar +2,3 % PIB a CCAA y condonar deuda prohibiendo el dumping fiscal.",
+                "points": [
+                    "Horizonte de República Federal plurinacional con Jefatura del Estado electa, Senado territorial, ley del plurilingüismo y laicidad estatal.",
+                    "Reforma autonómica con +2,3 % PIB anual (~38.000 M€), condonación de deuda condicionada a mínimos comunes en Patrimonio y Sucesiones, y financiación local hasta el 2,5 % del PIB.",
+                ],
+                "citations": [
+                    {"pdf_page": 103, "doc_page": 117, "section": "11.1–11.2 Financiación autonómica"},
+                    {"pdf_page": 140, "doc_page": 167, "section": "18.1 República Federal"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (secciones 1.3 y 3.2), defiende el Estado de las Autonomías con financiación multilateral en el CPFF, sin salidas del régimen común y con responsabilidad sobre la deuda.",
+                "points": [
+                    "Financiación autonómica multilateral en el CPFF con fondo de nivelación estatal e informe de AIReF, impidiendo salidas del régimen común o nuevos regímenes singulares bilaterales.",
+                    "Cada comunidad responde de su deuda (sin condonación asimétrica), blindaje de la caja única de la Seguridad Social y la Agencia Tributaria, y libertad fiscal autonómica.",
+                ],
+                "citations": [
+                    {"pdf_page": 15, "doc_page": 15, "section": "1.3 Medidas 15–18"},
+                    {"pdf_page": 33, "doc_page": 33, "section": "3.2 Medidas 100–102"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (págs. 61–62 y 92–93), impulsa +21.000 M€ en financiación autonómica, la asunción estatal de 83.000 M€ de deuda y un Senado de representación territorial.",
+                "points": [
+                    "Nuevo sistema de financiación autonómica (+21.000 M€), asunción parcial por el Estado de 83.000 M€ de deuda autonómica y refuerzo del Fondo de Compensación Interterritorial y entes locales.",
+                    "Reforma territorial del Senado, Conferencia de Presidentes institucionalizada y extensión del uso de lenguas cooficiales en la AGE.",
+                ],
+                "citations": [
+                    {"pdf_page": 60, "doc_page": 61, "section": "Financiación territorial · Comp. 229–232"},
+                    {"pdf_page": 91, "doc_page": 92, "section": "Estado autonómico · Comp. 382–385"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (puntos 25, 42, 103 y 105), se enfoca en unidad nacional, Ley de Unidad de Mercado e igualdad nacional de servicios sin proponer formalmente suprimir las CCAA.",
+                "points": [
+                    "Ley de Unidad de Mercado frente a 17 normativas distintas, igualdad nacional de servicios (Sanidad, Educación, Seguridad y Justicia) con tarjeta sanitaria, currículo y EVAU únicos.",
+                    "Recuperación de sedición, ilegalización de partidos que atenten contra la unidad e integridad territorial y endurecimiento de penas por ultrajes a símbolos nacionales.",
+                ],
+                "citations": [
+                    {"pdf_page": 20, "doc_page": 20, "section": "Prioridad nacional · Punto 25"},
+                    {"pdf_page": 28, "doc_page": 28, "section": "Desregulación · Punto 42"},
+                    {"pdf_page": 55, "doc_page": 55, "section": "Justicia · Puntos 103 y 105"},
+                ],
+            },
+        },
+        "followups": [
+            "¿Qué diferencias hay en impuestos (IRPF e IVA)?",
+            "Compara las propuestas de seguridad y justicia",
+        ],
+    },
+    {
+        "id": "economia_general",
+        "title": "Economía, industria, deuda y modelo productivo",
+        "exact_triggers": ["economia", "economico", "modelo economico", "industria", "deuda", "deficit", "banca", "productividad"],
+        "keywords": ["reindustrializacion", "sepi", "ico", "desregulacion", "gasto publico", "inflacion"],
+        "key_differences": [
+            "**Papel del Estado en la economía:** Frente Amplio impulsa Banca Pública Estatal, empresas públicas fuertes (SEPI) y democracia empresarial; PSOE moviliza 120.000 M€ público-privados con el Fondo España Crece y una Ley de Industria; PP combina auditoría del gasto en 100 días, rebaja fiscal y Zonas de Innovación Estratégica; VOX plantea rebaja fiscal general, desregulación «3 por 1», Unidad de Mercado y recortes del gasto no esencial.",
+            "**Deuda y gasto público:** PSOE compromete un Plan Fiscal 2027 decreciente avalado por AIReF; PP propone auditar todo el gasto en 100 días y ampliar poderes de la AIReF; VOX audita y recorta administraciones y subvenciones para bajar deuda; Frente Amplio reforma el art. 135 CE supeditando la estabilidad presupuestaria a la estabilidad social y financia mayor inversión pública gravando grandes corporaciones y fortunas.",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (capítulos 03, 06 y 13), apuesta por reforma fiscal a grandes empresas/fortunas, Banca Pública Estatal, SEPI industrial y participación laboral en empresas.",
+                "points": [
+                    "Banca Pública Estatal (ICO + Banco Postal en Correos + 18 % de CaixaBank) y transformación de la SEPI en Agencia Industrial Pública con I+D+i al 3 % del PIB en 2030.",
+                    "Tipo mínimo del 20 % en Sociedades a grandes grupos, Tasa Zucman del 3 % (>50 M€), representación laboral en consejos de administración y reparto obligatorio del 10 % de beneficios.",
+                ],
+                "citations": [
+                    {"pdf_page": 44, "doc_page": 49, "section": "3.1 Reforma fiscal"},
+                    {"pdf_page": 80, "doc_page": 89, "section": "6.1–6.3 Industria y banca"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (secciones 1.1, 4.4 y 4.5), combina auditoría del gasto en 100 días, regla «1 por 3», rebajas de IRPF/IVA e incentivos a productividad e innovación.",
+                "points": [
+                    "Auditoría integral del gasto público en 100 días, regla «1 por 3» para recortar burocracia un 25 % (35 % pymes) y test obligatorio de productividad para nuevas normas.",
+                    "Rebaja y deflactación del IRPF, IVA 0 % a alimentos básicos, libertad de amortización en Sociedades y Zonas de Innovación Estratégica con 7 años de fiscalidad favorable.",
+                ],
+                "citations": [
+                    {"pdf_page": 12, "doc_page": 12, "section": "1.1 Medida 1"},
+                    {"pdf_page": 47, "doc_page": 47, "section": "4.4 Medidas 177–181"},
+                    {"pdf_page": 48, "doc_page": 48, "section": "4.5 Medidas 186–191"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (págs. 14–19 y 48–50), impulsa el Fondo España Crece (120.000 M€), I+D al 1,5 % del PIB, Régimen 20 y mayor progresividad sobre grandes capitales.",
+                "points": [
+                    "Fondo España Crece (120.000 M€) para reindustrialización y pymes, Ley de Industria, Estrategia Deep Tech y senda de inversión pública en I+D al 1,5 % del PIB.",
+                    "Plan Fiscal 2027 avalado por AIReF con senda decreciente de deuda, Régimen 20 de simplificación y mayor tributación sobre rentas del capital >300.000 € (35 %), tasa Tobin (0,4 %) y lujo.",
+                ],
+                "citations": [
+                    {"pdf_page": 13, "doc_page": 14, "section": "Modelo económico · Comp. 1–2"},
+                    {"pdf_page": 47, "doc_page": 48, "section": "Responsabilidad fiscal · Comp. 125–135"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (puntos 2–8 y 36–43), propone rebaja masiva de impuestos, recorte del gasto público superfluo, regla «3 por 1», Unidad de Mercado y Plan de Reindustrialización.",
+                "points": [
+                    "Rebaja de IRPF, IVA y Sociedades, cuota de autónomos de 0 € bajo el SMI, reducción de deuda y supresión de subvenciones a partidos, sindicatos, patronales y ONG.",
+                    "Regla «3 por 1» de desregulación, silencio positivo, Ley de Unidad de Mercado y Plan Nacional de Reindustrialización con apoyo a I+D+i e IA.",
+                ],
+                "citations": [
+                    {"pdf_page": 9, "doc_page": 9, "section": "Economía · Puntos 2–3"},
+                    {"pdf_page": 27, "doc_page": 27, "section": "Desregulación · Puntos 36–42"},
+                ],
+            },
+        },
+        "followups": [
+            "¿Qué diferencias hay en impuestos (IRPF e IVA)?",
+            "Compara las propuestas de autónomos y pymes",
+        ],
+    },
+    {
+        "id": "transporte_infraestructuras",
+        "title": "Transporte público, trenes e infraestructuras",
+        "exact_triggers": ["transporte", "tren", "trenes", "cercanias", "ferrocarril", "renfe", "adif", "infraestructuras", "carreteras", "abono", "vuelos"],
+        "keywords": ["movilidad", "alta velocidad", "aeropuertos", "autobus", "inundaciones"],
+        "key_differences": [
+            "**Modelo ferroviario y abonos:** Frente Amplio crea un abono único estatal (20 €/mes Cercanías), fusiona Adif y Renfe, revierte la liberalización de alta velocidad y prohíbe vuelos con alternativa en tren de 2,5 h; PSOE blinda 19.000 M€ (2026–2030) para conservación ferroviaria y dirección técnica en Adif/Renfe; PP plantea un Plan Nacional de Infraestructuras de >300.000 M€ en 15 años con compensación por retrasos ferroviarios; VOX propone auditar la red ferroviaria priorizando seguridad, Cercanías y Media Distancia.",
+            "**Carreteras, aeropuertos y obras hidráulicas:** Frente Amplio reasigna al tren casi 13.000 M€ de ampliación aeroportuaria (DORA); PSOE destina 1.629 M€ en 4 años a 5.000 km de firmes de carreteras; PP y VOX priorizan inversión en carreteras, ferrocarril y obras hidráulicas y de limpieza de cauces frente a inundaciones.",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (sección 5.2), propone abono único estatal de 20 € en Cercanías, operador ferroviario único público y freno a vuelos cortos y ampliaciones aeroportuarias.",
+                "points": [
+                    "Abono único estatal (20 €/mes Cercanías, 10 € <26 años, gratis <16 y en islas/Ceuta/Melilla) y Fondo de Sostenibilidad del Transporte (0,25 % PIB).",
+                    "Fusión de Adif y Renfe en operador único, reversión de la liberalización de alta velocidad, prohibición de vuelos con alternativa en tren de 2,5 h y reasignación al tren de 13.000 M€ de aeropuertos.",
+                ],
+                "citations": [
+                    {"pdf_page": 65, "doc_page": 72, "section": "5.2 Movilidad sostenible"},
+                    {"pdf_page": 105, "doc_page": 119, "section": "11.3 Infraestructuras"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (sección 3.3), lanza un Plan Nacional de Infraestructuras de más de 300.000 M€ en 15 años, auditoría ferroviaria y obras hidráulicas.",
+                "points": [
+                    "Plan Nacional de Infraestructuras (>300.000 M€ en 15 años) integrando ferrocarril, carreteras, puertos, aeropuertos y hasta 40.000 M€ en el Pacto Nacional del Agua hasta 2030.",
+                    "Refuerzo de seguridad y mantenimiento en Cercanías y red ferroviaria, limpieza de cauces frente a inundaciones y garantía de movilidad y transporte a demanda en el medio rural.",
+                ],
+                "citations": [
+                    {"pdf_page": 36, "doc_page": 36, "section": "3.3 Infraestructuras · Med. 117–125"},
+                    {"pdf_page": 37, "doc_page": 37, "section": "3.3 Agua · Medida 126"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (págs. 20–22), blinda 19.000 M€ en cinco años para mantenimiento ferroviario, profesionaliza Adif y Renfe e invierte 1.629 M€ en firmes de carreteras.",
+                "points": [
+                    "Compromiso plurianual (2026–2030) de unos 19.000 M€ para conservación ferroviaria (+50 % en convenios Estado-Adif) y dirección de perfil técnico en Adif y Renfe.",
+                    "1.629 M€ en cuatro años para reparar firmes de 5.000 km de carreteras estatales y bonificaciones de transporte integradas en el bono social único.",
+                ],
+                "citations": [
+                    {"pdf_page": 19, "doc_page": 20, "section": "Infraestructuras · Comp. 23–25"},
+                    {"pdf_page": 21, "doc_page": 22, "section": "Carreteras · Comp. 32"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (puntos 112–115), propone un Plan Nacional de Infraestructuras, auditoría ferroviaria centrada en Cercanías y obras hidráulicas de contención.",
+                "points": [
+                    "Auditoría completa de la red ferroviaria priorizando seguridad, mantenimiento, Cercanías, Media Distancia y electrificación de líneas convencionales.",
+                    "Mayor inversión en carreteras, nodos logísticos y puertos, limpieza de cauces y barrancos frente a inundaciones e interconexión de cuencas hídricas.",
+                ],
+                "citations": [
+                    {"pdf_page": 61, "doc_page": 61, "section": "Infraestructuras · Puntos 112–115"},
+                ],
+            },
+        },
+        "followups": [
+            "¿Qué diferencias hay en energía nuclear y transición ecológica?",
+            "Compara las propuestas de economía e industria",
+        ],
+    },
+    {
+        "id": "digital_ia_menores",
+        "title": "Inteligencia artificial, digitalización y protección digital de menores",
+        "exact_triggers": ["inteligencia artificial", "ia", "redes sociales", "pantallas", "moviles", "digital", "digitalizacion", "algoritmos", "ciberestafas"],
+        "keywords": ["menores", "verificacion de edad", "tecnologicas", "chatbots", "datos"],
+        "key_differences": [
+            "**Menores, pantallas y redes sociales:** PP prohíbe redes sociales a menores de 14 años (autorización parental hasta 16) con verificación de edad y límites al scroll infinito; PSOE propone fijar 16 años como edad mínima en redes con verificación pública anónima y restringir chatbots de IA a <16 sin permiso parental; VOX prohíbe móviles en clase y protege a menores frente a juego y pornografía online; Frente Amplio regula gobernanza digital, privacidad y transparencia algorítmica.",
+            "**Inteligencia Artificial en economía y empleo:** PSOE impulsa Estrategia Deep Tech, Bono IA para pymes y plataforma pública de IA educativa; PP ofrece un cheque individual y portátil de formación en IA para cada trabajador y Zonas de Innovación Estratégica; VOX fomenta la adopción de IA en pymes y administraciones; Frente Amplio da poder de veto al comité de empresa sobre algoritmos laborales, cotización extra por despidos por IA y responsabilidad penal directiva.",
+        ],
+        "parties": {
+            "frente_amplio": {
+                "summary": "Según el programa de Frente Amplio (capítulo 14 y sec. 4.1), prioriza regulación estricta de la IA, transparencia algorítmica, veto laboral en empresas y soberanía digital pública.",
+                "points": [
+                    "Facultad del comité de empresa (art. 64 ET) para aprobar o vetar sistemas de IA laboral, cotización adicional por despidos por automatización y prohibición de algoritmos fijadores de alquileres.",
+                    "Gobernanza digital pública, responsabilidad penal de directivos, nube soberana desde Correos y prohibición de refrigeración con agua para centros de datos en cuencas en sequía.",
+                ],
+                "citations": [
+                    {"pdf_page": 120, "doc_page": 139, "section": "14.1–14.3 Poder digital e IA"},
+                    {"pdf_page": 52, "doc_page": 58, "section": "4.1 IA laboral"},
+                ],
+            },
+            "pp": {
+                "summary": "Según el programa del PP (medidas 168, 169 y 191), combina prohibición de redes a menores de 14 años, cheque personal de formación en IA y Zonas de Innovación Estratégica.",
+                "points": [
+                    "Prohibición de cuentas en redes sociales a menores de 14 años (permiso paterno hasta 16), verificación obligatoria de edad, límite al scroll infinito y descanso digital nocturno.",
+                    "Cheque individual y portátil de formación en IA para cada trabajador, libertad de amortización en IA/software y Zonas de Innovación Estratégica para semiconductores e IA.",
+                ],
+                "citations": [
+                    {"pdf_page": 45, "doc_page": 45, "section": "4.2–4.3 Medidas 168–169"},
+                    {"pdf_page": 48, "doc_page": 48, "section": "4.5 Medidas 188–191"},
+                ],
+            },
+            "psoe": {
+                "summary": "Según el programa del PSOE (págs. 18–19 y 95–96), propone fijar en 16 años la edad mínima en redes, impulsar el Bono IA para pymes y gravar grandes tecnológicas.",
+                "points": [
+                    "Ley de protección de menores en entornos digitales en el primer año: 16 años mínimos en redes, verificación pública anónima, freno a algoritmos adictivos y restricción de chatbots de IA a menores.",
+                    "Ampliación del Bono IA y Red NEURONA para pymes, Estrategia Deep Tech, uso ético de IA en educación y ampliación de la tasa Google a grandes tecnológicas e IA.",
+                ],
+                "citations": [
+                    {"pdf_page": 94, "doc_page": 95, "section": "Entornos digitales · Comp. 399–403"},
+                    {"pdf_page": 17, "doc_page": 18, "section": "IA y digitalización · Comp. 16"},
+                ],
+            },
+            "vox": {
+                "summary": "Según el programa de VOX (puntos 37, 69 y 97), prohíbe teléfonos móviles en clase, protege a menores ante riesgos digitales e impulsa IA en pymes y administraciones.",
+                "points": [
+                    "Prohibición de teléfonos móviles en las aulas, plan nacional contra el ciberacoso y protección de menores frente a juego y pornografía en internet.",
+                    "Impulso a la implantación de inteligencia artificial en empresas (especialmente pymes y autónomos) y en la Administración, con refuerzo de la ciberseguridad nacional.",
+                ],
+                "citations": [
+                    {"pdf_page": 41, "doc_page": 41, "section": "Educación · Punto 69"},
+                    {"pdf_page": 27, "doc_page": 27, "section": "Desregulación · Punto 37"},
+                    {"pdf_page": 52, "doc_page": 52, "section": "Familia · Punto 97"},
+                ],
+            },
+        },
+        "followups": [
+            "¿Qué diferencias hay en educación y colegios?",
+            "Compara las propuestas de economía e impuestos",
+        ],
+    },
+]
+
+
+def main():
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    # Sanity check: every topic has all 4 parties in alphabetical order
+    for t in TOPICS:
+        assert set(t["parties"].keys()) == {"frente_amplio", "pp", "psoe", "vox"}, f"Missing party in {t['id']}"
+
+    out_path = DATA_DIR / "topics_knowledge.json"
+    out_path.write_text(json.dumps(TOPICS, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"Wrote {out_path} ({len(TOPICS)} curated verified comparative topics)")
+
+
+if __name__ == "__main__":
+    main()

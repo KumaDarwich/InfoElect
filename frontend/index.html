@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InfoElect — Explorador Visual y Comparador Imparcial 29N 2026</title>
+  <meta name="description" content="Explora en un mapa visual las medidas de los 4 programas electorales descargados para las Elecciones Generales 29N 2026 y compáralos de forma imparcial." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <!-- Top Editorial Navigation -->
+  <header class="topbar" id="topbar">
+    <div class="topbar-inner">
+      <button class="brand" id="brandHomeBtn" title="Volver a la selección de partidos">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 28 28" fill="none">
+            <rect x="2" y="2" width="24" height="24" rx="7" fill="#0F172A" />
+            <circle cx="9.5" cy="9.5" r="3" fill="#EA4C1D" />
+            <circle cx="18.5" cy="9.5" r="3" fill="#0056A3" />
+            <circle cx="9.5" cy="18.5" r="3" fill="#E30613" />
+            <circle cx="18.5" cy="18.5" r="3" fill="#5BB318" />
+          </svg>
+        </span>
+        <span class="brand-text">
+          <strong>InfoElect</strong>
+          <small>Generales 29N 2026</small>
+        </span>
+      </button>
+
+      <nav class="view-tabs" id="viewTabs" aria-label="Vistas principales">
+        <button class="view-tab active" data-view="selector">
+          <span class="tab-dot"></span>Partidos
+        </button>
+        <button class="view-tab" data-view="map">
+          <span class="tab-dot"></span>Mapa Visual
+        </button>
+        <button class="view-tab" data-view="compare">
+          <span class="tab-dot"></span>Comparativa 4×1
+        </button>
+        <button class="view-tab" data-view="search">
+          <span class="tab-dot"></span>Buscador PDF
+        </button>
+      </nav>
+
+      <div class="topbar-actions">
+        <!-- Quick Party Switcher Bubble in Header -->
+        <div class="header-party-switcher" id="headerPartySwitcher">
+          <button class="party-pill-trigger" id="partyPillTrigger" aria-expanded="false">
+            <span class="party-pill-dot" id="headerPartyDot"></span>
+            <span id="headerPartyLabel">Elegir partido</span>
+            <svg class="chevron" viewBox="0 0 16 16" fill="none">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="party-dropdown-bubbles" id="partyDropdownBubbles" hidden>
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <button class="neutrality-pill" id="neutralityInfoBtn" title="Criterio de imparcialidad y fuentes">
+          <span class="status-dot"></span>
+          <span>100% Imparcial</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="app-main">
+    <!-- VIEW 1: PARTY BUBBLE SELECTOR STAGE -->
+    <section class="view-section active" id="viewSelector" aria-label="Selección de partido">
+      <div class="selector-hero">
+        <div class="hero-kicker">
+          <span class="kicker-badge">4 Programas Oficiales · 395 páginas indexadas</span>
+        </div>
+        <h1 class="hero-title">
+          Explora los programas electorales <span class="serif-accent">sin sesgos</span>
+        </h1>
+        <p class="hero-subtitle">
+          Pulsa una <strong>burbuja de partido</strong> para desplegar su mapa visual interactivo de medidas por ámbitos
+          (economía, vivienda, sanidad, educación, inmigración, pensiones…) o abre el <strong>comparador imparcial</strong> abajo a la derecha.
+        </p>
+
+        <!-- Interactive 4-Party Bubble Constellation -->
+        <div class="bubble-constellation" id="bubbleConstellation" role="list" aria-label="Burbuja de selección de los 4 partidos principales">
+          <!-- Rendered dynamically in neutral alphabetical order -->
+        </div>
+
+        <div class="selector-footer-actions">
+          <button class="secondary-cta" id="jumpCompareBtn">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            Ver comparativa de los 4 programas por ámbito
+          </button>
+          <button class="primary-ghost-cta" id="openChatFromHeroBtn">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M10 3v14M4 7l6-2 6 2M5.5 7L3 12.5h5L5.5 7zm9 0L12 12.5h5L14.5 7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Preguntar diferencias al chatbot imparcial
+          </button>
+        </div>
+
+        <p class="order-note">
+          Los 4 partidos se muestran en orden alfabético estricto (Frente Amplio, PP, PSOE, VOX) sin valoraciones ni clasificaciones.
+        </p>
+      </div>
+    </section>
+
+    <!-- VIEW 2: INTERACTIVE VISUAL MIND MAP -->
+    <section class="view-section" id="viewMap" aria-label="Mapa visual de medidas">
+      <div class="map-workspace">
+        <!-- Left/Center Interactive Map Canvas -->
+        <div class="map-canvas-panel">
+          <!-- Floating Party Switcher Bubble Bar inside Map -->
+          <div class="map-party-dock" id="mapPartyDock" aria-label="Cambiar partido en el mapa">
+            <!-- 4 interactive circular party bubbles -->
+          </div>
+
+          <!-- Map Controls (Zoom / Reset) -->
+          <div class="map-controls">
+            <button class="map-ctrl-btn" id="mapZoomIn" title="Acercar">+</button>
+            <button class="map-ctrl-btn" id="mapZoomOut" title="Alejar">−</button>
+            <button class="map-ctrl-btn" id="mapResetView" title="Centrar mapa">⌖</button>
+          </div>
+
+          <!-- Map Legend / Hint -->
+          <div class="map-hint" id="mapHint">
+            Haz clic en cualquier ámbito del mapa para explorar sus medidas y citas exactas del PDF
+          </div>
+
+          <!-- Interactive Radial SVG + Node Layer -->
+          <div class="mindmap-viewport" id="mindmapViewport">
+            <div class="mindmap-stage" id="mindmapStage">
+              <svg class="mindmap-svg" id="mindmapSvg" viewBox="0 0 960 680" preserveAspectRatio="xMidYMid meet"></svg>
+              <div class="mindmap-nodes" id="mindmapNodes"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Editorial Inspector Drawer for Selected Domain -->
+        <aside class="domain-inspector" id="domainInspector" aria-label="Detalle de medidas del ámbito">
+          <!-- Dynamically rendered when a party & domain are active -->
+        </aside>
+      </div>
+    </section>
+
+    <!-- VIEW 3: SIDE-BY-SIDE 4-PARTY COMPARISON MATRIX -->
+    <section class="view-section" id="viewCompare" aria-label="Comparativa por ámbito">
+      <div class="compare-container">
+        <div class="compare-header">
+          <div>
+            <h2>Comparativa imparcial por ámbito</h2>
+            <p>Las principales propuestas de los 4 programas oficiales lado a lado, en orden alfabético y con cita exacta de página.</p>
+          </div>
+          <button class="ask-compare-chat-btn" id="askDomainChatBtn">
+            ⚖️ Analizar diferencias de este ámbito en el chat
+          </button>
+        </div>
+
+        <div class="compare-domain-pills" id="compareDomainPills">
+          <!-- Domain filter chips -->
+        </div>
+
+        <div class="compare-grid" id="compareGrid">
+          <!-- 4 balanced columns -->
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: FULL-TEXT PDF SEARCH -->
+    <section class="view-section" id="viewSearch" aria-label="Buscador en los 4 programas PDF">
+      <div class="search-container">
+        <div class="search-header">
+          <h2>Buscador literal en los 4 programas PDF</h2>
+          <p>Busca cualquier término exacto (por ejemplo: <em>pensiones</em>, <em>okupación</em>, <em>nuclear</em>, <em>SMI</em>, <em>listas de espera</em>, <em>Ceuta</em>) en las 395 páginas descargadas.</p>
+        </div>
+
+        <form class="search-bar-form" id="pdfSearchForm">
+          <input
+            type="text"
+            id="pdfSearchInput"
+            placeholder="Buscar término o medida en los 4 PDFs oficiales..."
+            autocomplete="off"
+          />
+          <select id="pdfSearchPartyFilter" aria-label="Filtrar por partido">
+            <option value="">Todos los partidos (4)</option>
+            <option value="frente_amplio">Frente Amplio</option>
+            <option value="pp">PP</option>
+            <option value="psoe">PSOE</option>
+            <option value="vox">VOX</option>
+          </select>
+          <button type="submit">Buscar</button>
+        </form>
+
+        <div class="search-quick-tags" id="searchQuickTags">
+          <span>Búsquedas frecuentes:</span>
+          <button type="button" data-q="pensiones IPC">pensiones IPC</button>
+          <button type="button" data-q="energía nuclear">energía nuclear</button>
+          <button type="button" data-q="alquiler vivienda">alquiler vivienda</button>
+          <button type="button" data-q="listas de espera sanidad">listas de espera</button>
+          <button type="button" data-q="IRPF IVA impuestos">IRPF e IVA</button>
+          <button type="button" data-q="fronteras inmigración">fronteras e inmigración</button>
+        </div>
+
+        <div class="search-results" id="searchResults">
+          <div class="search-empty-state">
+            Escribe una palabra clave para inspeccionar pasajes textuales con su número de página en cada programa electoral.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- SOURCE PAGE / PDF INSPECTOR MODAL -->
+  <div class="modal-backdrop" id="sourceModal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="sourceModalTitle">
+      <div class="modal-header">
+        <div>
+          <span class="modal-party-badge" id="sourceModalParty"></span>
+          <h3 id="sourceModalTitle">Fuente oficial</h3>
+        </div>
+        <button class="modal-close" id="sourceModalClose" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal-meta" id="sourceModalMeta"></div>
+      <div class="modal-body" id="sourceModalBody"></div>
+      <div class="modal-footer">
+        <span class="modal-footnote">Texto extraído directamente del documento PDF oficial descargado.</span>
+        <a class="modal-pdf-link" id="sourceModalPdfLink" href="#" target="_blank" rel="noopener">
+          Abrir PDF original en esta página ↗
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPARTIALITY CHARTER MODAL -->
+  <div class="modal-backdrop" id="neutralityModal" hidden>
+    <div class="modal-card modal-card-sm" role="dialog" aria-modal="true" aria-labelledby="neutralityModalTitle">
+      <div class="modal-header">
+        <h3 id="neutralityModalTitle">Compromiso de Imparcialidad de InfoElect</h3>
+        <button class="modal-close" id="neutralityModalClose" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal-body neutrality-body">
+        <p><strong>InfoElect</strong> presenta de manera estrictamente neutral y verificable el contenido de los 4 programas electorales oficiales descargados para las Elecciones Generales del 29 de noviembre de 2026:</p>
+        <ul>
+          <li><strong>Frente Amplio</strong> — <em>Un programa como una casa</em> (<code>ProgramaFrenteAmplio.pdf</code>, 151 págs.)</li>
+          <li><strong>PP</strong> — <em>Reconstrucción Nacional</em> (<code>PROGRAMA-ELECTORAL-PP-2026-RECONSTRUCCION-NACIONAL.pdf</code>, 64 págs.)</li>
+          <li><strong>PSOE</strong> — <em>La fuerza de seguir avanzando</em> (<code>PROGRAMAPSOE29N26.pdf</code>, 114 págs.)</li>
+          <li><strong>VOX</strong> — <em>Es Sentido Común</em> (<code>Programa-completo-A5-1.pdf</code>, 66 págs.)</li>
+        </ul>
+        <p><strong>Reglas de neutralidad aplicadas:</strong></p>
+        <ul>
+          <li>Ordenación siempre alfabética y mismo peso visual para los 4 partidos.</li>
+          <li>Atribución explícita de cada medida al programa oficial correspondiente con número de página verificable.</li>
+          <li>El chatbot comparador <strong>no emite opiniones, valoraciones, puntuaciones ni recomendaciones de voto</strong>: expone únicamente coincidencias, diferencias y citas textuales.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM-RIGHT FLOATING IMPARTIAL CHATBOT BUBBLE & PANEL -->
+  <div class="chatbot-widget" id="chatbotWidget">
+    <!-- Floating Tooltip Label -->
+    <div class="chat-launcher-tooltip" id="chatLauncherTooltip">
+      <span>¿Dudas entre programas?</span>
+      <small>Comparador imparcial</small>
+    </div>
+
+    <!-- Bottom-Right Circular Chat Bubble -->
+    <button
+      class="chat-bubble-btn"
+      id="chatBubbleBtn"
+      aria-label="Abrir chatbot imparcial comparador de programas"
+      aria-expanded="false"
+    >
+      <span class="chat-bubble-ring"></span>
+      <svg class="chat-icon-open" viewBox="0 0 24 24" fill="none">
+        <path d="M12 4v16M5 8l7-2.5L19 8M6.5 8L3.5 14.5h6L6.5 8zm11 0L14.5 14.5h6L17.5 8zM8.5 20h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <svg class="chat-icon-close" viewBox="0 0 24 24" fill="none">
+        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="chat-live-dot" title="Imparcial y conectado a los 4 PDFs"></span>
+    </button>
+
+    <!-- Chat Drawer Window -->
+    <section class="chat-panel" id="chatPanel" aria-label="Chatbot imparcial comparador" hidden>
+      <header class="chat-panel-header">
+        <div class="chat-title-group">
+          <div class="chat-avatar">⚖️</div>
+          <div>
+            <h3>Comparador Imparcial</h3>
+            <span class="chat-subtitle">Solo diferencias factuales · Sin opiniones</span>
+          </div>
+        </div>
+        <div class="chat-header-controls">
+          <button class="chat-ctrl-btn" id="chatExpandBtn" title="Ampliar ventana">⤢</button>
+          <button class="chat-ctrl-btn" id="chatResetBtn" title="Nueva consulta">↺</button>
+          <button class="chat-ctrl-btn" id="chatCloseBtn" title="Cerrar">✕</button>
+        </div>
+      </header>
+
+      <!-- Party Filter Chips inside Chatbot -->
+      <div class="chat-party-filter" id="chatPartyFilter">
+        <span class="filter-label">Comparar:</span>
+        <button class="chat-party-chip active" data-party="all">Los 4</button>
+        <button class="chat-party-chip" data-party="frente_amplio">Frente Amplio</button>
+        <button class="chat-party-chip" data-party="pp">PP</button>
+        <button class="chat-party-chip" data-party="psoe">PSOE</button>
+        <button class="chat-party-chip" data-party="vox">VOX</button>
+      </div>
+
+      <!-- Messages Stream -->
+      <div class="chat-messages" id="chatMessages" aria-live="polite">
+        <!-- Welcome message + starter prompt chips rendered by chatbot.js -->
+      </div>
+
+      <!-- Input Form -->
+      <form class="chat-input-form" id="chatInputForm">
+        <input
+          type="text"
+          id="chatInput"
+          placeholder="Ej: ¿Qué diferencias hay en las pensiones?"
+          autocomplete="off"
+        />
+        <button type="submit" id="chatSendBtn" aria-label="Enviar pregunta">
+          <svg viewBox="0 0 20 20" fill="none">
+            <path d="M3 10l14-6-4 13-3.2-4.8L3 10z" fill="currentColor"/>
+          </svg>
+        </button>
+      </form>
+    </section>
+  </div>
+
+  <script type="module" src="/assets/app.js"></script>
+</body>
+</html>
